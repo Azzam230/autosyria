@@ -1,4 +1,14 @@
 -- Auto Syria - Supabase Database Schema
+-- تشغيل في SQL Editor في Supabase
+
+-- حذف السياسات القديمة (إذا كانت موجودة)
+DROP POLICY IF EXISTS "Admin can insert cars" ON cars;
+DROP POLICY IF EXISTS "Admin can update cars" ON cars;
+DROP POLICY IF EXISTS "Admin can delete cars" ON cars;
+DROP POLICY IF EXISTS "Admin can view sell requests" ON sell_requests;
+DROP POLICY IF EXISTS "Admin can update sell requests" ON sell_requests;
+DROP POLICY IF EXISTS "Admin can delete sell requests" ON sell_requests;
+
 CREATE TABLE IF NOT EXISTS cars (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   brand TEXT NOT NULL,
@@ -30,22 +40,22 @@ CREATE POLICY "Public can view available cars"
   ON cars FOR SELECT USING (status = 'available');
 
 CREATE POLICY "Admin can insert cars"
-  ON cars FOR INSERT WITH CHECK (auth.role() = 'service_role');
+  ON cars FOR INSERT WITH CHECK (auth.role() = 'authenticated');
 
 CREATE POLICY "Admin can update cars"
-  ON cars FOR UPDATE USING (auth.role() = 'service_role');
+  ON cars FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Admin can delete cars"
-  ON cars FOR DELETE USING (auth.role() = 'service_role');
+  ON cars FOR DELETE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Public can submit sell requests"
   ON sell_requests FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Admin can view sell requests"
-  ON sell_requests FOR SELECT USING (auth.role() = 'service_role');
+  ON sell_requests FOR SELECT USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Admin can update sell requests"
-  ON sell_requests FOR UPDATE USING (auth.role() = 'service_role');
+  ON sell_requests FOR UPDATE USING (auth.role() = 'authenticated');
 
 CREATE POLICY "Admin can delete sell requests"
-  ON sell_requests FOR DELETE USING (auth.role() = 'service_role');
+  ON sell_requests FOR DELETE USING (auth.role() = 'authenticated');
