@@ -1,68 +1,91 @@
 "use client"
 
-import Link from "next/link"
-import Button from "@/components/ui/Button"
-import { Car, ArrowLeft, MapPin, MessageCircle } from "lucide-react"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback } from "react"
+import { Search } from "lucide-react"
+import { BRANDS, GOVERNORATES } from "@/lib/constants"
 
 export default function HeroSection() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const updateFilter = useCallback(
+    (key: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      if (value) {
+        params.set(key, value)
+      } else {
+        params.delete(key)
+      }
+      params.set("page", "1")
+      router.push(`/?${params.toString()}`)
+    },
+    [router, searchParams]
+  )
+
+  const clearFilters = useCallback(() => {
+    router.push("/")
+  }, [router])
+
+  const hasFilters = Array.from(searchParams.entries()).length > 0
+
   return (
-    <section className="relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-b from-accent/5 via-transparent to-transparent pointer-events-none" />
-      <div className="max-w-7xl mx-auto px-4 py-12 md:py-20">
-        <div className="flex flex-col items-center text-center gap-6 max-w-2xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium">
-            <Car className="w-4 h-4" />
-            <span>سوق السيارات الأول في سوريا</span>
-          </div>
-          <h1 className="text-3xl md:text-5xl font-bold text-foreground leading-tight">
-            ابحث عن سيارتك القادمة
+    <section className="border-b border-border">
+      <div className="max-w-7xl mx-auto px-4 py-10 md:py-14">
+        <div className="text-center mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold text-foreground leading-tight">
+            اكتشف أفضل صفقات السيارات في سوريا
           </h1>
-          <p className="text-muted text-lg max-w-lg leading-relaxed">
-            تصفح أحدث إعلانات السيارات في جميع المحافظات السورية. تواصل مباشرة مع البائع عبر واتساب.
+          <p className="text-muted mt-2 text-sm md:text-base max-w-lg mx-auto">
+            تصفح آلاف الإعلانات من جميع المحافظات وتواصل مباشرة مع البائع
           </p>
-          <div className="flex gap-3 mt-2">
-            <Link href="#cars">
-              <Button size="lg">
-                تصفح السيارات
-                <ArrowLeft className="w-5 h-5" />
-              </Button>
-            </Link>
-            <Link href="/sell">
-              <Button variant="secondary" size="lg">
-                بيع سيارتك
-              </Button>
-            </Link>
-          </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto mt-12">
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-              <Car className="w-5 h-5 text-accent" />
-            </div>
-            <div className="text-right">
-              <p className="font-semibold text-foreground text-sm">تشكيلة واسعة</p>
-              <p className="text-xs text-muted">جميع الماركات والموديلات</p>
-            </div>
+        <div className="bg-card border border-border rounded-xl p-4 md:p-5 shadow-sm">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <select
+              value={searchParams.get("brand") || ""}
+              onChange={e => updateFilter("brand", e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+            >
+              <option value="">الماركة</option>
+              {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+
+            <select
+              value={searchParams.get("governorate") || ""}
+              onChange={e => updateFilter("governorate", e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+            >
+              <option value="">المدينة</option>
+              {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+
+            <input
+              type="number"
+              placeholder="السعر من"
+              value={searchParams.get("minPrice") || ""}
+              onChange={e => updateFilter("minPrice", e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+            />
+
+            <input
+              type="number"
+              placeholder="السعر إلى"
+              value={searchParams.get("maxPrice") || ""}
+              onChange={e => updateFilter("maxPrice", e.target.value)}
+              className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+            />
           </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-              <MapPin className="w-5 h-5 text-accent" />
+
+          {hasFilters && (
+            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+              <span className="text-xs text-muted">فلاتر مفعلة</span>
+              <button onClick={clearFilters} className="text-xs text-accent hover:text-accent-hover font-medium transition-colors">
+                مسح الكل
+              </button>
             </div>
-            <div className="text-right">
-              <p className="font-semibold text-foreground text-sm">كل سوريا</p>
-              <p className="text-xs text-muted">إعلانات من جميع المحافظات</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border sm:col-span-1">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-              <MessageCircle className="w-5 h-5 text-accent" />
-            </div>
-            <div className="text-right">
-              <p className="font-semibold text-foreground text-sm">تواصل فوري</p>
-              <p className="text-xs text-muted">راسل البائع عبر واتساب</p>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </section>

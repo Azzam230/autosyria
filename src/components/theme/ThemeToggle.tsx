@@ -4,35 +4,35 @@ import { useEffect, useState } from "react"
 import { Moon, Sun } from "lucide-react"
 
 export default function ThemeToggle() {
-  const [isLight, setIsLight] = useState(false)
+  const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem("theme")
-    if (stored === "light") {
-      document.documentElement.classList.add("light")
-      setIsLight(true)
+    if (stored === "dark") {
+      document.documentElement.classList.add("dark")
+      setIsDark(true)
     }
   }, [])
 
   function toggle() {
-    const next = !isLight
+    const next = !isDark
     if (next) {
-      document.documentElement.classList.add("light")
-      localStorage.setItem("theme", "light")
-    } else {
-      document.documentElement.classList.remove("light")
+      document.documentElement.classList.add("dark")
       localStorage.setItem("theme", "dark")
+    } else {
+      document.documentElement.classList.remove("dark")
+      localStorage.setItem("theme", "light")
     }
-    setIsLight(next)
+    setIsDark(next)
   }
 
   return (
     <button
       onClick={toggle}
-      className="p-2 rounded-lg hover:bg-card transition-colors"
-      title={isLight ? "الوضع الليلي" : "الوضع النهاري"}
+      className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+      title={isDark ? "الوضع النهاري" : "الوضع الليلي"}
     >
-      {isLight ? <Moon className="w-5 h-5 text-muted" /> : <Sun className="w-5 h-5 text-muted" />}
+      {isDark ? <Sun className="w-5 h-5 text-muted" /> : <Moon className="w-5 h-5 text-muted" />}
     </button>
   )
 }

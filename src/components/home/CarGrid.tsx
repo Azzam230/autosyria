@@ -15,9 +15,8 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
   if (!supabase) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <Database className="w-16 h-16 text-muted/30" />
-        <p className="text-muted text-lg">في انتظار الاتصال بقاعدة البيانات</p>
-        <p className="text-sm text-muted/60">قم بتعيين NEXT_PUBLIC_SUPABASE_URL في ملف .env.local</p>
+        <Database className="w-12 h-12 text-muted/30" />
+        <p className="text-muted">في انتظار الاتصال بقاعدة البيانات</p>
       </div>
     )
   }
@@ -44,8 +43,8 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
   if (!cars || cars.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
-        <CarIcon className="w-16 h-16 text-muted/30" />
-        <p className="text-muted text-lg">لا توجد سيارات متوفرة حالياً</p>
+        <CarIcon className="w-12 h-12 text-muted/30" />
+        <p className="text-muted">لا توجد سيارات متوفرة حالياً</p>
       </div>
     )
   }
@@ -54,9 +53,9 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
 
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {cars.map((car: Car) => (
-          <CarCard key={car.id} car={car} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+        {cars.map((car: Car, i: number) => (
+          <CarCard key={car.id} car={car} priority={i < 4} />
         ))}
       </div>
 
@@ -68,7 +67,7 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
               <a
                 key={p}
                 href={`/?${new URLSearchParams({ ...Object.fromEntries(Object.entries(params).filter(([_, v]) => v)), page: String(p) }).toString()}`}
-                className={`w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${isActive ? "bg-accent text-white" : "bg-card text-muted hover:text-foreground border border-border"}`}
+                className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${isActive ? "bg-accent text-white" : "bg-card text-muted hover:text-foreground border border-border"}`}
               >
                 {p}
               </a>
