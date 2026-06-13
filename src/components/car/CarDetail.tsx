@@ -3,6 +3,7 @@ import { notFound } from "next/navigation"
 import { formatPrice, getImageUrl } from "@/lib/utils"
 import Badge from "@/components/ui/Badge"
 import WhatsAppButton from "./WhatsAppButton"
+import ImageGallery from "./ImageGallery"
 import { MapPin, Gauge, Calendar, Database } from "lucide-react"
 import type { Car } from "@/lib/types"
 
@@ -27,44 +28,46 @@ export default async function CarDetail({ id }: CarDetailProps) {
   if (!car || car.status !== "available") notFound()
 
   const c = car as Car
+  const images = c.images || []
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="rounded-xl border border-border bg-card overflow-hidden">
-          {c.images?.[0] ? (
-            <img
-              src={getImageUrl(c.images[0])}
-              alt={`${c.brand} ${c.model}`}
-              className="w-full aspect-[4/3] object-cover"
-            />
+        <div>
+          {images.length > 0 ? (
+            <ImageGallery images={images} alt={`${c.brand} ${c.model}`} getImageUrl={getImageUrl} />
           ) : (
-            <div className="w-full aspect-[4/3] flex items-center justify-center bg-card-hover">
-              <span className="text-muted/30">لا توجد صورة</span>
+            <div className="rounded-xl border border-border bg-card overflow-hidden">
+              <div className="w-full aspect-[4/3] flex items-center justify-center bg-card-hover">
+                <span className="text-muted/30">لا توجد صورة</span>
+              </div>
             </div>
           )}
         </div>
 
         <div className="space-y-5">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-xs text-muted bg-card px-2 py-0.5 rounded-full border border-border">رقم {c.ref_number}</span>
+              <Badge variant="success">متوفرة</Badge>
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mt-2">
               {c.brand} {c.model} {c.year}
             </h1>
-            <Badge variant="success" className="mt-2">متوفرة</Badge>
           </div>
 
           <div className="text-3xl font-bold text-accent">{formatPrice(c.price)}</div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border">
-              <Calendar className="w-5 h-5 text-muted" />
+              <Calendar className="w-5 h-5 text-muted shrink-0" />
               <div>
                 <p className="text-xs text-muted">سنة الصنع</p>
                 <p className="font-medium">{c.year}</p>
               </div>
             </div>
             <div className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border">
-              <MapPin className="w-5 h-5 text-muted" />
+              <MapPin className="w-5 h-5 text-muted shrink-0" />
               <div>
                 <p className="text-xs text-muted">المحافظة</p>
                 <p className="font-medium">{c.governorate}</p>
@@ -72,7 +75,7 @@ export default async function CarDetail({ id }: CarDetailProps) {
             </div>
             {c.mileage && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-card border border-border">
-                <Gauge className="w-5 h-5 text-muted" />
+                <Gauge className="w-5 h-5 text-muted shrink-0" />
                 <div>
                   <p className="text-xs text-muted">عدد الكيلومترات</p>
                   <p className="font-medium">{c.mileage.toLocaleString()} كم</p>
@@ -81,7 +84,7 @@ export default async function CarDetail({ id }: CarDetailProps) {
             )}
           </div>
 
-          <WhatsAppButton brand={c.brand} model={c.model} year={c.year} price={c.price} />
+          <WhatsAppButton brand={c.brand} model={c.model} year={c.year} price={c.price} refNumber={c.ref_number} />
         </div>
       </div>
     </div>

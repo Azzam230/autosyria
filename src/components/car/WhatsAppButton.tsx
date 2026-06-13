@@ -6,12 +6,13 @@ interface WhatsAppButtonProps {
   model: string
   year: number
   price: number
+  refNumber?: number
 }
 
-export default function WhatsAppButton({ brand, model, year, price }: WhatsAppButtonProps) {
+export default function WhatsAppButton({ brand, model, year, price, refNumber }: WhatsAppButtonProps) {
   return (
     <a
-      href={generateWhatsAppLink(WHATSAPP_NUMBER, brand, model, year, price)}
+      href={generateWhatsAppLink(WHATSAPP_NUMBER, brand, model, year, price, refNumber)}
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center justify-center gap-2 w-full px-6 py-3.5 rounded-xl bg-green-600 hover:bg-green-700 text-white font-semibold text-base transition-all duration-200 shadow-lg shadow-green-600/20"

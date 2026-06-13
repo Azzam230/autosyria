@@ -3,6 +3,7 @@ export type SellRequestStatus = 'pending' | 'reviewed' | 'approved'
 
 export interface Car {
   id: string
+  ref_number: number
   brand: string
   model: string
   year: number

@@ -11,6 +11,7 @@ DROP POLICY IF EXISTS "Admin can delete sell requests" ON sell_requests;
 
 CREATE TABLE IF NOT EXISTS cars (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  ref_number SERIAL UNIQUE,
   brand TEXT NOT NULL,
   model TEXT NOT NULL,
   year INTEGER NOT NULL,

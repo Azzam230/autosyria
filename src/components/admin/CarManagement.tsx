@@ -8,13 +8,15 @@ import Badge from "@/components/ui/Badge"
 import Card from "@/components/ui/Card"
 import AddCarForm from "./AddCarForm"
 import { useToast } from "@/components/ui/Toast"
-import { Plus, Trash2, Check } from "lucide-react"
+import { Plus, Trash2, Check, Pencil } from "lucide-react"
 import type { Car } from "@/lib/types"
+import EditCarForm from "./EditCarForm"
 
 export default function CarManagement() {
   const [cars, setCars] = useState<Car[]>([])
   const [loading, setLoading] = useState(true)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingCar, setEditingCar] = useState<Car | null>(null)
   const supabaseRef = useRef<any>(null)
   const getSupabase = () => {
     if (!supabaseRef.current) supabaseRef.current = createClient()
@@ -85,6 +87,13 @@ export default function CarManagement() {
                 <Check className="w-4 h-4" />
               </button>
               <button
+                onClick={() => setEditingCar(car)}
+                className="p-2 rounded-lg hover:bg-card-hover transition-colors text-muted hover:text-accent"
+                title="تعديل"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button
                 onClick={() => deleteCar(car.id)}
                 className="p-2 rounded-lg hover:bg-card-hover transition-colors text-muted hover:text-red-400"
                 title="حذف"
@@ -100,6 +109,14 @@ export default function CarManagement() {
       </div>
 
       <AddCarForm open={showAddForm} onClose={() => setShowAddForm(false)} onSuccess={fetchCars} />
+      {editingCar && (
+        <EditCarForm
+          car={editingCar}
+          open={!!editingCar}
+          onClose={() => setEditingCar(null)}
+          onSuccess={fetchCars}
+        />
+      )}
     </div>
   )
 }

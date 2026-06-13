@@ -25,13 +25,13 @@
 }
 
 :root.light {
-  --bg: #FFFFFF;
-  --fg: #1F2937;
+  --bg: #F8F9FB;
+  --fg: #1A1D23;
   --accent: #E11D24;
   --accent-hover: #B8151C;
-  --card: #F3F4F6;
-  --card-hover: #E5E7EB;
-  --border: #D1D5DB;
+  --card: #FFFFFF;
+  --card-hover: #F0F1F4;
+  --border: #E2E5EA;
   --muted: #6B7280;
 }
 

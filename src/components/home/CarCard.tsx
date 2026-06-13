@@ -34,12 +34,15 @@ export default function CarCard({ car }: CarCardProps) {
         </div>
       </Link>
 
-      <div className="p-4 space-y-3">
-        <Link href={`/car/${car.id}`}>
-          <h3 className="font-semibold text-foreground text-base leading-tight group-hover:text-accent transition-colors">
-            {car.brand} {car.model} {car.year}
-          </h3>
-        </Link>
+        <div className="p-4 space-y-3">
+          <Link href={`/car/${car.id}`}>
+            <h3 className="font-semibold text-foreground text-base leading-tight group-hover:text-accent transition-colors">
+              {car.brand} {car.model} {car.year}
+            </h3>
+          </Link>
+          <div className="text-xs text-muted bg-card-hover px-2 py-0.5 rounded-full inline-block border border-border/50">
+            رقم {car.ref_number}
+          </div>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
           <span className="flex items-center gap-1">
@@ -63,7 +66,7 @@ export default function CarCard({ car }: CarCardProps) {
         </div>
 
         <a
-          href={generateWhatsAppLink(WHATSAPP_NUMBER, car.brand, car.model, car.year, car.price)}
+          href={generateWhatsAppLink(WHATSAPP_NUMBER, car.brand, car.model, car.year, car.price, car.ref_number)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium text-sm transition-colors"
