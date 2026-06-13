@@ -28,14 +28,14 @@ export default async function CarDetail({ id }: CarDetailProps) {
   if (!car || car.status !== "available") notFound()
 
   const c = car as Car
-  const images = c.images || []
+  const images = (c.images || []).map(getImageUrl)
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
       <div className="grid md:grid-cols-2 gap-6">
         <div>
           {images.length > 0 ? (
-            <ImageGallery images={images} alt={`${c.brand} ${c.model}`} getImageUrl={getImageUrl} />
+            <ImageGallery imageUrls={images} alt={`${c.brand} ${c.model}`} />
           ) : (
             <div className="rounded-xl border border-border bg-card overflow-hidden">
               <div className="w-full aspect-[4/3] flex items-center justify-center bg-card-hover">
