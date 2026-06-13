@@ -5,6 +5,7 @@ import { Menu, X } from "lucide-react"
 import { useState } from "react"
 import { SITE_NAME } from "@/lib/constants"
 import Button from "@/components/ui/Button"
+import ThemeToggle from "@/components/theme/ThemeToggle"
 
 const navLinks = [
   { href: "/", label: "الرئيسية" },
@@ -24,12 +25,13 @@ export default function Header() {
           <span className="font-bold text-lg text-foreground">{SITE_NAME}</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-2">
           {navLinks.map(link => (
-            <Link key={link.href} href={link.href} className="text-sm text-muted hover:text-foreground transition-colors">
+            <Link key={link.href} href={link.href} className="text-sm text-muted hover:text-foreground transition-colors px-2">
               {link.label}
             </Link>
           ))}
+          <ThemeToggle />
           <Link href="/admin/dashboard">
             <Button variant="secondary" size="sm">لوحة التحكم</Button>
           </Link>
@@ -48,6 +50,10 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <div className="flex items-center justify-between px-3">
+              <span className="text-sm text-muted">المظهر</span>
+              <ThemeToggle />
+            </div>
             <Link href="/admin/dashboard" onClick={() => setMenuOpen(false)}>
               <Button variant="secondary" size="sm" className="w-full">لوحة التحكم</Button>
             </Link>

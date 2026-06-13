@@ -19,6 +19,7 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
   const [loading, setLoading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const supabaseRef = useRef<any>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const getSupabase = () => {
     if (!supabaseRef.current) supabaseRef.current = createClient()
     return supabaseRef.current
@@ -109,11 +110,11 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
 
         <div>
           <label className="text-sm font-medium text-foreground block mb-1.5">صور السيارة</label>
-          <div className="flex items-center gap-2 p-3 rounded-lg border border-dashed border-border bg-card cursor-pointer hover:bg-card-hover transition-colors">
+          <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 w-full p-3 rounded-lg border border-dashed border-border bg-card hover:bg-card-hover transition-colors cursor-pointer">
             <Upload className="w-5 h-5 text-muted" />
-            <span className="text-sm text-muted">اختر صوراً للسيارة</span>
-            <input type="file" multiple accept="image/*" onChange={handleFiles} className="hidden" />
-          </div>
+            <span className="text-sm text-muted">اختر صوراً للسيارة (يمكنك اختيار عدة)</span>
+            <input type="file" multiple accept="image/*" onChange={handleFiles} ref={fileInputRef} className="hidden" />
+          </button>
           {files.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {files.map((file, i) => (

@@ -14,7 +14,10 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="ar" dir="rtl" className="h-full">
+    <html lang="ar" dir="rtl" className="h-full" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `document.documentElement.classList.toggle('light',localStorage.getItem('theme')==='light')` }} />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground antialiased">
         <Header />
         <main className="flex-1">{children}</main>

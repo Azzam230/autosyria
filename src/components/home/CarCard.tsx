@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Car, MapPin } from "lucide-react"
+import { Car, MapPin, Calendar, Gauge } from "lucide-react"
 import Badge from "@/components/ui/Badge"
 import { formatPrice, generateWhatsAppLink, getImageUrl } from "@/lib/utils"
 import { WHATSAPP_NUMBER } from "@/lib/constants"
@@ -41,14 +41,20 @@ export default function CarCard({ car }: CarCardProps) {
           </h3>
         </Link>
 
-        <div className="flex items-center gap-1.5 text-sm text-muted">
-          <MapPin className="w-4 h-4" />
-          <span>{car.governorate}</span>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+          <span className="flex items-center gap-1">
+            <Calendar className="w-3.5 h-3.5" />
+            {car.year}
+          </span>
+          <span className="flex items-center gap-1">
+            <MapPin className="w-3.5 h-3.5" />
+            {car.governorate}
+          </span>
           {car.mileage && (
-            <>
-              <span className="text-border">•</span>
-              <span>{car.mileage.toLocaleString()} كم</span>
-            </>
+            <span className="flex items-center gap-1">
+              <Gauge className="w-3.5 h-3.5" />
+              {car.mileage.toLocaleString()} كم
+            </span>
           )}
         </div>
 
