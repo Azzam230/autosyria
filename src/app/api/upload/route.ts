@@ -2,10 +2,8 @@ import { NextResponse } from "next/server"
 
 async function getSupabase() {
   const { createClient } = await import("@supabase/supabase-js")
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, key)
 }
 
 export async function POST(request: Request) {
