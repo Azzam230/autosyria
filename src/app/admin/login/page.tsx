@@ -23,18 +23,32 @@ export default function AdminLoginPage() {
 
     try {
       const { createClient } = await import("@/lib/supabase/client")
-      if (!supabaseRef.current) supabaseRef.current = createClient()
-      const { error: authError } = await supabaseRef.current.auth.signInWithPassword({ email, password })
+      if (!supabaseRef.current) {
+        try {
+          supabaseRef.current = createClient()
+        } catch {
+          setError("Supabase غير مهيأ. تأكد من ضبط .env.local")
+          setLoading(false)
+          return
+        }
+      }
 
-      if (authError) {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("انتهت مهلة الاتصال")), 15000)
+      )
+
+      const authPromise = supabaseRef.current.auth.signInWithPassword({ email, password })
+      const result = await Promise.race([authPromise, timeoutPromise]) as any
+
+      if (result.error) {
         setError("البريد الإلكتروني أو كلمة المرور غير صحيحة")
         setLoading(false)
         return
       }
 
       router.push("/admin/dashboard")
-    } catch {
-      setError("Supabase غير مهيأ. يرجى ضبط .env.local")
+    } catch (err: any) {
+      setError(err?.message === "انتهت مهلة الاتصال" ? "انتهت مهلة الاتصال. تحقق من اتصالك بالإنترنت" : "حدث خطأ في الاتصال")
       setLoading(false)
     }
   }
@@ -52,7 +66,7 @@ export default function AdminLoginPage() {
         <div className="rounded-xl border border-border bg-card p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-900/20 border border-red-800 text-red-400 text-sm">{error}</div>
+              <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">{error}</div>
             )}
             <Input name="email" label="البريد الإلكتروني" type="email" placeholder="admin@autosyria.com" dir="ltr" required />
             <Input name="password" label="كلمة المرور" type="password" placeholder="••••••••" dir="ltr" required />
