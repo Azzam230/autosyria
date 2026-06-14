@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState, useRef, type FormEvent } from "react"
-import { createClient } from "@/lib/supabase/client"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import Modal from "@/components/ui/Modal"
@@ -80,13 +79,13 @@ export default function BrandManagement() {
     let logo_url = editBrand?.logo_url || ""
 
     if (logoFile) {
-      const supabase = createClient()
-      const ext = logoFile.name.split(".").pop()
-      const filePath = `brands/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const { error: uploadError } = await supabase.storage.from("brand-logos").upload(filePath, logoFile, { contentType: logoFile.type, upsert: true })
-      if (uploadError) { showToast("فشل رفع الشعار", "error"); setSaving(false); return }
-      if (editBrand?.logo_url) { await supabase.storage.from("brand-logos").remove([editBrand.logo_url]).catch(() => {}) }
-      logo_url = filePath
+      const uploadForm = new FormData()
+      uploadForm.append("file", logoFile)
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm })
+      if (!uploadRes.ok) { const err = await uploadRes.json(); showToast(err.error || "فشل رفع الشعار", "error"); setSaving(false); return }
+      const { path } = await uploadRes.json()
+      if (editBrand?.logo_url) { await fetch(`/api/upload/delete?path=${encodeURIComponent(editBrand.logo_url)}`, { method: "DELETE" }).catch(() => {}) }
+      logo_url = path
     }
 
     const method = editBrand ? "PUT" : "POST"
