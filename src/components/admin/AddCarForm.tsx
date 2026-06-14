@@ -15,9 +15,13 @@ interface AddCarFormProps {
   onSuccess: () => void
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
+
 export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps) {
   const [loading, setLoading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
+  const [fileError, setFileError] = useState("")
   const supabaseRef = useRef<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const getSupabase = () => {
@@ -27,9 +31,25 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
   const { showToast } = useToast()
 
   function handleFiles(e: ChangeEvent<HTMLInputElement>) {
-    if (e.target.files) {
-      setFiles(Array.from(e.target.files))
+    setFileError("")
+    if (!e.target.files) return
+
+    const selected = Array.from(e.target.files)
+    const invalidFile = selected.find(f => !ALLOWED_TYPES.includes(f.type))
+    if (invalidFile) {
+      setFileError("يُسمح فقط بصور JPG و PNG و WebP")
+      e.target.value = ""
+      return
     }
+
+    const oversized = selected.find(f => f.size > MAX_FILE_SIZE)
+    if (oversized) {
+      setFileError("حجم الصورة يجب ألا يتجاوز 5 ميغابايت")
+      e.target.value = ""
+      return
+    }
+
+    setFiles(selected)
   }
 
   function removeFile(index: number) {
@@ -121,9 +141,10 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
           <label className="text-sm font-medium text-foreground block mb-1.5">صور السيارة</label>
           <button type="button" onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 w-full p-3 rounded-lg border border-dashed border-border bg-card hover:bg-card-hover transition-colors cursor-pointer">
             <Upload className="w-5 h-5 text-muted" />
-            <span className="text-sm text-muted">اختر صوراً للسيارة (يمكنك اختيار عدة)</span>
-            <input type="file" multiple accept="image/*" onChange={handleFiles} ref={fileInputRef} className="hidden" />
+            <span className="text-sm text-muted">اختر صوراً للسيارة (JPG, PNG, WebP - حد أقصى 5MB)</span>
+            <input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={handleFiles} ref={fileInputRef} className="hidden" />
           </button>
+          {fileError && <p className="text-red-500 text-xs mt-1">{fileError}</p>}
           {files.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {files.map((file, i) => (

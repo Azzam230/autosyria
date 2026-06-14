@@ -28,64 +28,66 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink }: Car
   return (
     <div className="pb-24 md:pb-12">
       {/* Image Gallery */}
-      <div className="relative bg-card">
-        <div className="relative aspect-[16/10] md:aspect-[16/7] overflow-hidden">
-          {imageUrls.length > 0 ? (
-            <Image
-              src={imageUrls[activeIndex]}
-              alt={`${c.brand} ${c.model} ${c.year}`}
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-card-hover">
-              <span className="text-muted/30">لا توجد صورة</span>
+      <div className="bg-muted/20">
+        <div className="max-w-5xl mx-auto relative">
+          <div className="relative w-full h-[45vh] md:h-[55vh] flex items-center justify-center bg-muted/10">
+            {imageUrls.length > 0 ? (
+              <Image
+                src={imageUrls[activeIndex]}
+                alt={`${c.brand} ${c.model} ${c.year}`}
+                fill
+                className="object-contain p-2"
+                priority
+                sizes="(max-width: 768px) 100vw, 80vw"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center">
+                <span className="text-muted/30">لا توجد صورة</span>
+              </div>
+            )}
+
+            {imageUrls.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveIndex(i => (i > 0 ? i - 1 : imageUrls.length - 1))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition-colors"
+                >
+                  <ChevronRight className="w-5 h-5 text-foreground" />
+                </button>
+                <button
+                  onClick={() => setActiveIndex(i => (i < imageUrls.length - 1 ? i + 1 : 0))}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition-colors"
+                >
+                  <ChevronLeft className="w-5 h-5 text-foreground" />
+                </button>
+              </>
+            )}
+
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+              {imageUrls.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`w-2 h-2 rounded-full transition-colors ${i === activeIndex ? "bg-accent" : "bg-muted/40"}`}
+                />
+              ))}
             </div>
-          )}
+          </div>
 
           {imageUrls.length > 1 && (
-            <>
-              <button
-                onClick={() => setActiveIndex(i => (i > 0 ? i - 1 : imageUrls.length - 1))}
-                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition-colors"
-              >
-                <ChevronRight className="w-5 h-5 text-foreground" />
-              </button>
-              <button
-                onClick={() => setActiveIndex(i => (i < imageUrls.length - 1 ? i + 1 : 0))}
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 shadow flex items-center justify-center hover:bg-white transition-colors"
-              >
-                <ChevronLeft className="w-5 h-5 text-foreground" />
-              </button>
-            </>
+            <div className="flex gap-2 p-3 overflow-x-auto bg-card border-t border-border">
+              {imageUrls.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`relative w-20 h-14 rounded-md overflow-hidden shrink-0 transition-all ${i === activeIndex ? "ring-2 ring-accent" : "opacity-60 hover:opacity-100"}`}
+                >
+                  <Image src={url} alt="" fill className="object-cover" sizes="80px" />
+                </button>
+              ))}
+            </div>
           )}
-
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {imageUrls.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`w-2 h-2 rounded-full transition-colors ${i === activeIndex ? "bg-white" : "bg-white/50"}`}
-              />
-            ))}
-          </div>
         </div>
-
-        {imageUrls.length > 1 && (
-          <div className="flex gap-2 p-3 overflow-x-auto bg-card border-b border-border">
-            {imageUrls.map((url, i) => (
-              <button
-                key={i}
-                onClick={() => setActiveIndex(i)}
-                className={`relative w-20 h-14 rounded-md overflow-hidden shrink-0 transition-all ${i === activeIndex ? "ring-2 ring-accent" : "opacity-60 hover:opacity-100"}`}
-              >
-                <Image src={url} alt="" fill className="object-cover" sizes="80px" />
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Content */}
@@ -95,7 +97,6 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink }: Car
           العودة للنتائج
         </Link>
 
-        {/* Header Info */}
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-foreground leading-tight">
             {c.brand} {c.model} {c.year}
@@ -116,7 +117,6 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink }: Car
           </div>
         </div>
 
-        {/* Specs Grid */}
         <div>
           <h2 className="text-sm font-semibold text-foreground mb-3">المواصفات الأساسية</h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">

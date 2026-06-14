@@ -25,7 +25,15 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     .from("cars")
     .select("*", { count: "exact" })
     .eq("status", "available")
-    .order("created_at", { ascending: false })
+
+  const sort = (params.sort as string) || "newest"
+  if (sort === "price_asc") {
+    query = query.order("price", { ascending: true })
+  } else if (sort === "price_desc") {
+    query = query.order("price", { ascending: false })
+  } else {
+    query = query.order("created_at", { ascending: false })
+  }
 
   if (params.brand) query = query.eq("brand", params.brand)
   if (params.governorate) query = query.eq("governorate", params.governorate)

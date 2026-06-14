@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useRef, type FormEvent } from "react"
-import { createClient } from "@/lib/supabase/client"
+import { useState, type FormEvent } from "react"
 import { BRANDS } from "@/lib/constants"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
@@ -14,12 +13,6 @@ interface SellFormProps {
 export default function SellForm({ onSuccess }: SellFormProps) {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const supabaseRef = useRef<any>(null)
-  const getSupabase = () => {
-    if (!supabaseRef.current) supabaseRef.current = createClient()
-    return supabaseRef.current
-  }
-
   const brandOptions = BRANDS.map(b => ({ value: b, label: b }))
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
@@ -32,7 +25,7 @@ export default function SellForm({ onSuccess }: SellFormProps) {
       model: form.get("model") as string,
       year: Number(form.get("year")),
       expected_price: Number(form.get("expected_price")),
-      phone_number: form.get("phone_number") as string,
+      phone_number: (form.get("phone_number") as string).trim(),
     }
 
     const newErrors: Record<string, string> = {}
@@ -49,22 +42,32 @@ export default function SellForm({ onSuccess }: SellFormProps) {
 
     setLoading(true)
 
-    const { error } = await getSupabase().from("sell_requests").insert([data])
+    try {
+      const res = await fetch("/api/sell", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
 
-    setLoading(false)
+      const result = await res.json()
 
-    if (error) {
-      setErrors({ form: "حدث خطأ أثناء الإرسال. يرجى المحاولة لاحقاً." })
-      return
+      if (!res.ok) {
+        setErrors({ form: result.error || "حدث خطأ أثناء الإرسال" })
+        setLoading(false)
+        return
+      }
+
+      onSuccess()
+    } catch {
+      setErrors({ form: "حدث خطأ في الاتصال. تحقق من اتصالك بالإنترنت." })
+      setLoading(false)
     }
-
-    onSuccess()
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {errors.form && (
-        <div className="p-3 rounded-lg bg-red-900/20 border border-red-800 text-red-400 text-sm">
+        <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">
           {errors.form}
         </div>
       )}
