@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, type FormEvent } from "react"
-import { BRANDS } from "@/lib/constants"
+import { useBrandNames } from "@/hooks/useBrands"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import Select from "@/components/ui/Select"
@@ -13,7 +13,8 @@ interface SellFormProps {
 export default function SellForm({ onSuccess }: SellFormProps) {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
-  const brandOptions = BRANDS.map(b => ({ value: b, label: b }))
+  const brands = useBrandNames()
+  const brandOptions = brands.map(b => ({ value: b, label: b }))
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()

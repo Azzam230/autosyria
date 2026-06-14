@@ -34,8 +34,16 @@ CREATE TABLE IF NOT EXISTS sell_requests (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
+CREATE TABLE IF NOT EXISTS brands (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL UNIQUE,
+  logo_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
 ALTER TABLE cars ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sell_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE brands ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public can view available cars"
   ON cars FOR SELECT USING (status = 'available');
@@ -60,3 +68,15 @@ CREATE POLICY "Admin can update sell requests"
 
 CREATE POLICY "Admin can delete sell requests"
   ON sell_requests FOR DELETE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Public can view brands"
+  ON brands FOR SELECT USING (true);
+
+CREATE POLICY "Admin can insert brands"
+  ON brands FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Admin can update brands"
+  ON brands FOR UPDATE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Admin can delete brands"
+  ON brands FOR DELETE USING (auth.role() = 'authenticated');

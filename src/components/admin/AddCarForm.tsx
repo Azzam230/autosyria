@@ -2,7 +2,8 @@
 
 import { useState, useRef, type FormEvent, type ChangeEvent } from "react"
 import { createClient } from "@/lib/supabase/client"
-import { BRANDS, GOVERNORATES } from "@/lib/constants"
+import { useBrandNames } from "@/hooks/useBrands"
+import { GOVERNORATES } from "@/lib/constants"
 import Button from "@/components/ui/Button"
 import Input from "@/components/ui/Input"
 import Modal from "@/components/ui/Modal"
@@ -22,6 +23,7 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
   const [loading, setLoading] = useState(false)
   const [files, setFiles] = useState<File[]>([])
   const [fileError, setFileError] = useState("")
+  const brands = useBrandNames()
   const supabaseRef = useRef<any>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const getSupabase = () => {
@@ -121,7 +123,7 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
         <div className="grid grid-cols-2 gap-3">
           <select name="brand" required className="rounded-lg border border-border bg-card px-3 py-2.5 text-foreground text-sm">
             <option value="">الماركة</option>
-            {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+            {brands.map(b => <option key={b} value={b}>{b}</option>)}
           </select>
           <Input name="model" placeholder="الموديل" required />
         </div>

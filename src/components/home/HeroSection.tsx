@@ -1,26 +1,16 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
 import { ArrowUpDown } from "lucide-react"
-import { BRANDS, GOVERNORATES } from "@/lib/constants"
+import { GOVERNORATES } from "@/lib/constants"
+import { getImageUrl } from "@/lib/utils"
 
-const BRAND_COLORS: Record<string, string> = {
-  "كيا": "bg-[#BB162B]",
-  "هيونداي": "bg-[#002C5F]",
-  "تويوتا": "bg-[#EB0A1E]",
-  "نيسان": "bg-[#C3002F]",
-  "ميتسوبيشي": "bg-[#D7182A]",
-  "شيفروليه": "bg-[#C8102E]",
-  "بي إم دبليو": "bg-[#0066B1]",
-  "مرسيدس": "bg-[#00B3B3]",
-  "أودي": "bg-[#000000]",
-  "فولكس فاجن": "bg-[#001E50]",
-  "رينو": "bg-[#FFC420]",
-  "بيجو": "bg-[#003B78]",
-  "سوزوكي": "bg-[#E40421]",
-  "هوندا": "bg-[#C8102E]",
-  "مازدا": "bg-[#101010]",
+interface Brand {
+  id: string
+  name: string
+  logo_url: string | null
 }
 
 const SORT_OPTIONS = [
@@ -29,19 +19,28 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "السعر: الأعلى أولاً" },
 ]
 
+const FALLBACK_COLORS = [
+  "bg-red-600", "bg-blue-700", "bg-red-700", "bg-red-700",
+  "bg-red-700", "bg-red-700", "bg-blue-600", "bg-teal-500",
+  "bg-gray-900", "bg-blue-800", "bg-yellow-500", "bg-blue-700",
+  "bg-red-600", "bg-red-700", "bg-gray-900",
+]
+
 export default function HeroSection() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const activeBrand = searchParams.get("brand") || ""
+  const [brands, setBrands] = useState<Brand[]>([])
+
+  useEffect(() => {
+    fetch("/api/brands").then(r => r.ok && r.json()).then(setBrands).catch(() => {})
+  }, [])
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
       const params = new URLSearchParams(searchParams.toString())
-      if (value) {
-        params.set(key, value)
-      } else {
-        params.delete(key)
-      }
+      if (value) params.set(key, value)
+      else params.delete(key)
       params.set("page", "1")
       router.push(`/?${params.toString()}`)
     },
@@ -56,7 +55,7 @@ export default function HeroSection() {
 
   return (
     <section className="border-b border-border">
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 md:py-10">
         <div className="text-center mb-6">
           <h1 className="text-2xl md:text-4xl font-bold text-foreground leading-tight">
             اكتشف أفضل صفقات السيارات في سوريا
@@ -82,20 +81,24 @@ export default function HeroSection() {
               </div>
               <span className="text-[10px] font-medium">الكل</span>
             </button>
-            {BRANDS.map(brand => (
+            {brands.map((brand, i) => (
               <button
-                key={brand}
-                onClick={() => updateFilter("brand", brand === activeBrand ? "" : brand)}
+                key={brand.id}
+                onClick={() => updateFilter("brand", brand.name === activeBrand ? "" : brand.name)}
                 className={`flex flex-col items-center gap-1.5 px-3 py-2 rounded-xl border transition-all shrink-0 min-w-[72px] ${
-                  brand === activeBrand
+                  brand.name === activeBrand
                     ? "border-accent bg-accent/5 text-accent"
                     : "border-border bg-card text-muted hover:border-muted hover:text-foreground"
                 }`}
               >
-                <div className={`w-9 h-9 rounded-full ${BRAND_COLORS[brand] || "bg-muted"} flex items-center justify-center text-white font-bold text-xs shadow-sm`}>
-                  {brand.charAt(0)}
-                </div>
-                <span className="text-[10px] font-medium leading-tight text-center">{brand}</span>
+                {brand.logo_url ? (
+                  <img src={getImageUrl(brand.logo_url, "brand-logos")} alt={brand.name} className="w-9 h-9 rounded-full object-contain border border-border bg-white" />
+                ) : (
+                  <div className={`w-9 h-9 rounded-full ${FALLBACK_COLORS[i % FALLBACK_COLORS.length]} flex items-center justify-center text-white font-bold text-xs shadow-sm`}>
+                    {brand.name.charAt(0)}
+                  </div>
+                )}
+                <span className="text-[10px] font-medium leading-tight text-center">{brand.name}</span>
               </button>
             ))}
           </div>

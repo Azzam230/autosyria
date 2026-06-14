@@ -17,8 +17,8 @@ export function generateWhatsAppLink(
   return `https://wa.me/${phone}?text=${text}`
 }
 
-export function getImageUrl(imagePath: string): string {
+export function getImageUrl(imagePath: string, bucket: string = "car-images"): string {
   if (imagePath.startsWith('http')) return imagePath
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(/\/+$/, '')
-  return `${supabaseUrl}/storage/v1/object/public/car-images/${imagePath}`
+  return `${supabaseUrl}/storage/v1/object/public/${bucket}/${imagePath}`
 }

@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation"
 import { ToastProvider } from "@/components/ui/Toast"
 import CarManagement from "@/components/admin/CarManagement"
 import SellRequestsTable from "@/components/admin/SellRequestsTable"
+import BrandManagement from "@/components/admin/BrandManagement"
 import Button from "@/components/ui/Button"
-import { LogOut, Car, ClipboardList } from "lucide-react"
+import { LogOut, Car, ClipboardList, Tag } from "lucide-react"
 
-type Tab = "cars" | "requests"
+type Tab = "cars" | "requests" | "brands"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("cars")
@@ -52,6 +53,12 @@ export default function AdminDashboard() {
 
   if (!authorized) return null
 
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: "cars", label: "إدارة الإعلانات", icon: <Car className="w-4 h-4" /> },
+    { key: "brands", label: "الماركات", icon: <Tag className="w-4 h-4" /> },
+    { key: "requests", label: "طلبات البيع", icon: <ClipboardList className="w-4 h-4" /> },
+  ]
+
   return (
     <ToastProvider>
       <div className="min-h-screen bg-background">
@@ -65,27 +72,22 @@ export default function AdminDashboard() {
           </div>
 
           <div className="flex items-center gap-2 mb-6 p-1 rounded-xl bg-card border border-border">
-            <button
-              onClick={() => setActiveTab("cars")}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                activeTab === "cars" ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-muted hover:text-foreground"
-              }`}
-            >
-              <Car className="w-4 h-4" />
-              إدارة الإعلانات
-            </button>
-            <button
-              onClick={() => setActiveTab("requests")}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                activeTab === "requests" ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-muted hover:text-foreground"
-              }`}
-            >
-              <ClipboardList className="w-4 h-4" />
-              طلبات البيع
-            </button>
+            {tabs.map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === tab.key ? "bg-accent text-white shadow-lg shadow-accent/20" : "text-muted hover:text-foreground"
+                }`}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
           </div>
 
           {activeTab === "cars" && <CarManagement />}
+          {activeTab === "brands" && <BrandManagement />}
           {activeTab === "requests" && <SellRequestsTable />}
         </div>
       </div>

@@ -3,11 +3,13 @@
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback, Suspense } from "react"
 import { Search } from "lucide-react"
-import { BRANDS, GOVERNORATES } from "@/lib/constants"
+import { useBrandNames } from "@/hooks/useBrands"
+import { GOVERNORATES } from "@/lib/constants"
 
 function MobileSearchBarInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const brands = useBrandNames()
 
   const updateFilter = useCallback(
     (key: string, value: string) => {
@@ -31,7 +33,7 @@ function MobileSearchBarInner() {
             className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
           >
             <option value="">الماركة</option>
-            {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
+            {brands.map(b => <option key={b} value={b}>{b}</option>)}
           </select>
           <select
             value={searchParams.get("governorate") || ""}

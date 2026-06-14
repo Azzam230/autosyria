@@ -35,7 +35,7 @@ export default async function CarDetailPage({ params }: PageProps) {
   if (!car || car.status !== "available") notFound()
 
   const c = car as Car
-  const imageUrls = (c.images || []).map(getImageUrl)
+  const imageUrls = (c.images || []).map(img => getImageUrl(img))
   const whatsappLink = generateWhatsAppLink(WHATSAPP_NUMBER, c.brand, c.model, c.year, c.price, c.ref_number)
 
   return <CarDetailClient car={c} imageUrls={imageUrls} whatsappLink={whatsappLink} />

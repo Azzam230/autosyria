@@ -28,7 +28,7 @@ export default async function CarDetail({ id }: CarDetailProps) {
   if (!car || car.status !== "available") notFound()
 
   const c = car as Car
-  const images = (c.images || []).map(getImageUrl)
+  const images = (c.images || []).map(img => getImageUrl(img))
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
