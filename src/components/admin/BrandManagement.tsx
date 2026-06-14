@@ -68,42 +68,52 @@ export default function BrandManagement() {
     setLogoPreview(URL.createObjectURL(file))
   }
 
+  async function safeJson(res: Response) {
+    try { return await res.json() } catch { return { error: "خطأ في الاستجابة" } }
+  }
+
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setSaving(true)
 
-    const form = new FormData(e.currentTarget)
-    const name = (form.get("name") as string).trim()
-    if (!name) { showToast("اسم الماركة مطلوب", "error"); setSaving(false); return }
+    try {
+      const form = new FormData(e.currentTarget)
+      const name = (form.get("name") as string).trim()
+      if (!name) { showToast("اسم الماركة مطلوب", "error"); setSaving(false); return }
 
-    let logo_url = editBrand?.logo_url || ""
+      let logo_url = editBrand?.logo_url || ""
 
-    if (logoFile) {
-      const uploadForm = new FormData()
-      uploadForm.append("file", logoFile)
-      const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm })
-      if (!uploadRes.ok) { const err = await uploadRes.json(); showToast(err.error || "فشل رفع الشعار", "error"); setSaving(false); return }
-      const { path } = await uploadRes.json()
-      if (editBrand?.logo_url) { await fetch(`/api/upload/delete?path=${encodeURIComponent(editBrand.logo_url)}`, { method: "DELETE" }).catch(() => {}) }
-      logo_url = path
+      if (logoFile) {
+        const uploadForm = new FormData()
+        uploadForm.append("file", logoFile)
+        const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadForm })
+        const uploadData = await safeJson(uploadRes)
+        if (!uploadRes.ok) { showToast(uploadData.error || "فشل رفع الشعار", "error"); setSaving(false); return }
+        if (editBrand?.logo_url) { fetch(`/api/upload?path=${encodeURIComponent(editBrand.logo_url)}`, { method: "DELETE" }).catch(() => {}) }
+        logo_url = uploadData.path
+      }
+
+      const method = editBrand ? "PUT" : "POST"
+      const body = editBrand ? { id: editBrand.id, name, logo_url } : { name, logo_url }
+      const res = await fetch("/api/brands", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      const data = await safeJson(res)
+
+      setSaving(false)
+      if (!res.ok) { showToast(data.error || "حدث خطأ", "error"); return }
+
+      showToast(editBrand ? "تم تحديث الماركة" : "تمت إضافة الماركة", "success")
+      setModalOpen(false)
+      loadBrands()
+    } catch {
+      showToast("حدث خطأ غير متوقع", "error")
+      setSaving(false)
     }
-
-    const method = editBrand ? "PUT" : "POST"
-    const body = editBrand ? { id: editBrand.id, name, logo_url } : { name, logo_url }
-
-    const res = await fetch("/api/brands", { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
-
-    setSaving(false)
-    if (!res.ok) { const err = await res.json(); showToast(err.error || "حدث خطأ", "error"); return }
-
-    showToast(editBrand ? "تم تحديث الماركة" : "تمت إضافة الماركة", "success")
-    setModalOpen(false)
-    loadBrands()
   }
 
   async function handleDelete(id: string) {
     const res = await fetch(`/api/brands?id=${id}`, { method: "DELETE" })
-    if (!res.ok) { showToast("فشل الحذف", "error"); return }
+    const data = await safeJson(res)
+    if (!res.ok) { showToast(data.error || "فشل الحذف", "error"); return }
     showToast("تم حذف الماركة", "success")
     setDeleteConfirm(null)
     loadBrands()
