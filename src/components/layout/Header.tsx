@@ -25,7 +25,7 @@ export default function Header() {
 
           <Link href="/" className="flex items-center">
             <Image
-              src="/logo.jpeg"
+              src="/logo.png"
               alt={SITE_NAME}
               width={100}
               height={28}
