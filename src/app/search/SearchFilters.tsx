@@ -79,18 +79,20 @@ export default function SearchFilters() {
       </select>
 
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         placeholder="أقل سعر"
         value={searchParams.get("minPrice") || ""}
-        onChange={e => updateFilter("minPrice", e.target.value)}
+        onChange={e => updateFilter("minPrice", e.target.value.replace(/[^0-9]/g, ""))}
         className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
       />
 
       <input
-        type="number"
+        type="text"
+        inputMode="numeric"
         placeholder="أعلى سعر"
         value={searchParams.get("maxPrice") || ""}
-        onChange={e => updateFilter("maxPrice", e.target.value)}
+        onChange={e => updateFilter("maxPrice", e.target.value.replace(/[^0-9]/g, ""))}
         className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
       />
 

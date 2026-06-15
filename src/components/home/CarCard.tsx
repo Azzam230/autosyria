@@ -52,15 +52,15 @@ export default function CarCard({ car, priority = false }: CarCardProps) {
         </div>
 
         <div className="p-3 space-y-2">
-          <div className="text-base md:text-lg font-bold text-foreground leading-tight">
+          <div className="text-[15px] md:text-lg font-bold text-foreground leading-tight">
             {formatPrice(car.price)}
           </div>
 
-          <h3 className="text-sm font-medium text-foreground/80 leading-snug line-clamp-1">
+          <h3 className="text-sm md:text-[15px] font-medium text-foreground/80 leading-snug line-clamp-1">
             {car.brand} {car.model} {car.year}
           </h3>
 
-          <div className="flex items-center gap-1.5 text-[11px] text-muted flex-wrap">
+          <div className="flex items-center gap-1.5 text-[11px] md:text-xs text-muted flex-wrap">
             <span className="flex items-center gap-1">
               <MapPin className="w-3 h-3" />
               {car.governorate}
