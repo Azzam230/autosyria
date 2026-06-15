@@ -46,6 +46,10 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
     { label: "المدينة", value: c.governorate },
     { label: "السعر", value: formatPrice(c.price) },
     ...(c.mileage ? [{ label: "المسافة المقطوعة", value: `${c.mileage.toLocaleString()} كم` }] : []),
+    ...(c.fuel_type ? [{ label: "نوع الوقود", value: c.fuel_type }] : []),
+    ...(c.transmission ? [{ label: "القير", value: c.transmission }] : []),
+    ...(c.engine_cc ? [{ label: "سعة المحرك", value: `${c.engine_cc} CC` }] : []),
+    ...(c.color ? [{ label: "اللون", value: c.color }] : []),
   ]
 
   return (
@@ -163,18 +167,16 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
           </div>
         </div>
 
-        {c.mileage && (
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border">
-            <Gauge className="w-5 h-5 text-muted shrink-0" />
-            <div>
-              <p className="text-xs text-muted">المسافة المقطوعة</p>
-              <p className="font-medium text-foreground">{c.mileage.toLocaleString()} كم</p>
-            </div>
+        {c.description && (
+          <div>
+            <h2 className="text-sm font-semibold text-foreground mb-2">الوصف</h2>
+            <p className="text-sm text-muted leading-relaxed whitespace-pre-wrap">{c.description}</p>
           </div>
         )}
 
         <div className="text-xs text-muted leading-relaxed">
           أعلن رقم {c.ref_number} • تاريخ الإعلان: {new Date(c.created_at).toLocaleDateString("ar-SA")}
+          {c.phone && <> • <span dir="ltr">{c.phone}</span></>}
         </div>
       </div>
 

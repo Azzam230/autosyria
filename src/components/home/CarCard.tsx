@@ -61,6 +61,18 @@ export default function CarCard({ car, priority = false }: CarCardProps) {
                 </span>
               </>
             )}
+            {car.fuel_type && (
+              <>
+                <span className="text-border">•</span>
+                <span>{car.fuel_type}</span>
+              </>
+            )}
+            {car.transmission && (
+              <>
+                <span className="text-border">•</span>
+                <span>{car.transmission}</span>
+              </>
+            )}
             <span className="text-border">•</span>
             <span className="flex items-center gap-1">
               <Calendar className="w-3 h-3" />

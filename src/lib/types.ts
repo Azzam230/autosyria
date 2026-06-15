@@ -1,5 +1,7 @@
 export type CarStatus = 'available' | 'sold'
 export type SellRequestStatus = 'pending' | 'reviewed' | 'approved'
+export type FuelType = 'بنزين' | 'ديزل' | 'كهرباء' | 'هايبرد'
+export type Transmission = 'عادي' | 'أوتوماتيك' | 'CVT'
 
 export interface Car {
   id: string
@@ -10,6 +12,12 @@ export interface Car {
   price: number
   mileage: number | null
   governorate: string
+  fuel_type: FuelType | null
+  transmission: Transmission | null
+  engine_cc: number | null
+  color: string | null
+  description: string | null
+  phone: string | null
   images: string[]
   status: CarStatus
   created_at: string

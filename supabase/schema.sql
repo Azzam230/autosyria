@@ -18,6 +18,12 @@ CREATE TABLE IF NOT EXISTS cars (
   price NUMERIC NOT NULL,
   mileage INTEGER,
   governorate TEXT NOT NULL,
+  fuel_type TEXT DEFAULT 'بنزين' CHECK (fuel_type IN ('بنزين', 'ديزل', 'كهرباء', 'هايبرد')),
+  transmission TEXT DEFAULT 'عادي' CHECK (transmission IN ('عادي', 'أوتوماتيك', 'CVT')),
+  engine_cc INTEGER,
+  color TEXT,
+  description TEXT,
+  phone TEXT,
   images TEXT[] DEFAULT '{}',
   status TEXT DEFAULT 'available' CHECK (status IN ('available', 'sold')),
   created_at TIMESTAMPTZ DEFAULT now()

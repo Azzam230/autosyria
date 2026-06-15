@@ -57,6 +57,12 @@ export default function EditCarForm({ car, open, onClose, onSuccess }: EditCarFo
       price: Number(form.get("price")),
       mileage: form.get("mileage") ? Number(form.get("mileage")) : null,
       governorate: form.get("governorate") as string,
+      fuel_type: form.get("fuel_type") as string || null,
+      transmission: form.get("transmission") as string || null,
+      engine_cc: form.get("engine_cc") ? Number(form.get("engine_cc")) : null,
+      color: form.get("color") as string || null,
+      description: form.get("description") as string || null,
+      phone: form.get("phone") as string || null,
     }
 
     const supabase = getSupabase()
@@ -115,6 +121,27 @@ export default function EditCarForm({ car, open, onClose, onSuccess }: EditCarFo
             {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
           </select>
         </div>
+        <div className="grid grid-cols-3 gap-3">
+          <select name="fuel_type" defaultValue={car.fuel_type ?? ""} className="rounded-lg border border-border bg-card px-3 py-2.5 text-foreground text-sm">
+            <option value="">نوع الوقود</option>
+            <option value="بنزين">بنزين</option>
+            <option value="ديزل">ديزل</option>
+            <option value="كهرباء">كهرباء</option>
+            <option value="هايبرد">هايبرد</option>
+          </select>
+          <select name="transmission" defaultValue={car.transmission ?? ""} className="rounded-lg border border-border bg-card px-3 py-2.5 text-foreground text-sm">
+            <option value="">القير</option>
+            <option value="عادي">عادي</option>
+            <option value="أوتوماتيك">أوتوماتيك</option>
+            <option value="CVT">CVT</option>
+          </select>
+          <Input name="engine_cc" type="number" defaultValue={car.engine_cc ?? ""} placeholder="سعة المحرك (CC)" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Input name="color" type="text" defaultValue={car.color ?? ""} placeholder="اللون" />
+          <Input name="phone" type="text" defaultValue={car.phone ?? ""} placeholder="رقم البائع (اختياري)" dir="ltr" />
+        </div>
+        <textarea name="description" rows={3} defaultValue={car.description ?? ""} placeholder="وصف السيارة (اختياري)" className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent" />
 
         <div>
           <label className="text-sm font-medium text-foreground block mb-1.5">صور السيارة</label>
