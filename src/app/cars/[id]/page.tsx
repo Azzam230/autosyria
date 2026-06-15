@@ -15,12 +15,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const supabase = await createClient()
   if (!supabase) return { title: "Auto Syria" }
 
-  const { data } = await supabase.from("cars").select("brand, model, year, price").eq("id", id).single()
-  if (!data) return { title: "السيارة غير موجودة | Auto Syria" }
+  const { data } = await supabase.from("cars").select("brand, model, year, price, governorate, images").eq("id", id).single()
+  if (!data) return { title: "السيارة غير موجودة" }
+
+  const title = `سيارة ${data.brand}, ${data.model}, ${data.year} في ${data.governorate} في سوريا`
+  const description = `${data.brand} ${data.model} ${data.year} - ${formatPrice(data.price)}. سيارة متوفرة للبيع في ${data.governorate}، سوريا. تصفح التفاصيل وتواصل مع البائع.`
+  const imageUrl = data.images?.[0] ? getImageUrl(data.images[0]) : undefined
 
   return {
-    title: `${data.brand} ${data.model} ${data.year} | Auto Syria`,
-    description: `${data.brand} ${data.model} ${data.year} - ${formatPrice(data.price)}. تصفح تفاصيل السيارة وتواصل مع البائع.`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      locale: "ar_SY",
+      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 900 }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
   }
 }
 
