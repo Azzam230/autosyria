@@ -53,7 +53,10 @@ export default async function CarDetailPage({ params }: PageProps) {
 
   const c = car as Car
   const imageUrls = (c.images || []).map(img => getImageUrl(img))
-  const whatsappLink = generateWhatsAppLink(WHATSAPP_NUMBER, c.brand, c.model, c.year, c.price, c.ref_number)
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://autosyria.com"
+  const carUrl = `${baseUrl}/cars/${id}`
+  const shareText = `سيارة ${c.brand} ${c.model} ${c.year} - ${formatPrice(c.price)} في ${c.governorate}، سوريا`
+  const whatsappLink = generateWhatsAppLink(WHATSAPP_NUMBER, c.brand, c.model, c.year, c.price, c.ref_number, carUrl)
 
-  return <CarDetailClient car={c} imageUrls={imageUrls} whatsappLink={whatsappLink} />
+  return <CarDetailClient car={c} imageUrls={imageUrls} whatsappLink={whatsappLink} carUrl={carUrl} shareText={shareText} />
 }

@@ -8,11 +8,13 @@ export function generateWhatsAppLink(
   model: string,
   year: number,
   price: number,
-  ref_number?: number
+  ref_number?: number,
+  carUrl?: string
 ): string {
   const ref = ref_number ? ` (رقم ${ref_number})` : ''
+  const url = carUrl ? `\n\n${carUrl}` : ''
   const text = encodeURIComponent(
-    `مرحباً Auto Syria، أنا مهتم بالسيارة ${brand} ${model} ${year}${ref} المعروضة بسعر ${formatPrice(price)}. أريد معرفة التفاصيل.`
+    `مرحباً Auto Syria، أنا مهتم بالسيارة ${brand} ${model} ${year}${ref} المعروضة بسعر ${formatPrice(price)}.${url}`
   )
   return `https://wa.me/${phone}?text=${text}`
 }
