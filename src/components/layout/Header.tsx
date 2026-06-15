@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { Car, PlusCircle } from "lucide-react"
 import { SITE_NAME } from "@/lib/constants"
@@ -22,11 +23,15 @@ export default function Header() {
             بيع سيارتك
           </Link>
 
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-7 h-7 rounded-lg bg-accent flex items-center justify-center shadow-sm group-hover:shadow-md transition-shadow">
-              <Car className="w-3.5 h-3.5 text-white" />
-            </div>
-            <span className="font-bold text-sm text-foreground tracking-tight">{SITE_NAME}</span>
+          <Link href="/" className="flex items-center">
+            <Image
+              src="/logo.jpeg"
+              alt={SITE_NAME}
+              width={100}
+              height={28}
+              className="h-7 w-auto object-contain"
+              priority
+            />
           </Link>
 
           {/* Desktop Nav */}
