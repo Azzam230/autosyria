@@ -35,8 +35,14 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     query = query.order("created_at", { ascending: false })
   }
 
+  if (params.q) {
+    const q = params.q as string
+    query = query.or(`brand.ilike.%${q}%,model.ilike.%${q}%`)
+  }
   if (params.brand) query = query.eq("brand", params.brand)
   if (params.governorate) query = query.eq("governorate", params.governorate)
+  if (params.fuel_type) query = query.eq("fuel_type", params.fuel_type)
+  if (params.transmission) query = query.eq("transmission", params.transmission)
   if (params.minPrice) query = query.gte("price", Number(params.minPrice))
   if (params.maxPrice) query = query.lte("price", Number(params.maxPrice))
 
@@ -49,10 +55,11 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
   const { data: cars, count } = await query
 
   if (!cars || cars.length === 0) {
+    const hasFilters = params.q || params.brand || params.governorate || params.fuel_type || params.transmission || params.minPrice || params.maxPrice
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
         <CarIcon className="w-12 h-12 text-muted/30" />
-        <p className="text-muted">لا توجد سيارات متوفرة حالياً</p>
+        <p className="text-muted">{hasFilters ? "لا توجد سيارات تطابق بحثك. جرب تغيير الفلاتر." : "لا توجد سيارات متوفرة حالياً"}</p>
       </div>
     )
   }

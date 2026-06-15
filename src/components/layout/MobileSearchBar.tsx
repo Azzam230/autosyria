@@ -25,38 +25,72 @@ function MobileSearchBarInner() {
   return (
     <div className="md:hidden border-b border-border bg-muted/10">
       <div className="max-w-7xl mx-auto px-3 py-2">
-        <div className="flex items-center gap-2">
-          <Search className="w-4 h-4 text-muted shrink-0" />
-          <select
-            value={searchParams.get("brand") || ""}
-            onChange={e => updateFilter("brand", e.target.value)}
-            className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            <option value="">الماركة</option>
-            {brands.map(b => <option key={b} value={b}>{b}</option>)}
-          </select>
-          <select
-            value={searchParams.get("governorate") || ""}
-            onChange={e => updateFilter("governorate", e.target.value)}
-            className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
-          >
-            <option value="">المدينة</option>
-            {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
-          </select>
-          <input
-            type="number"
-            placeholder="من"
-            value={searchParams.get("minPrice") || ""}
-            onChange={e => updateFilter("minPrice", e.target.value)}
-            className="w-16 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-accent"
-          />
-          <input
-            type="number"
-            placeholder="إلى"
-            value={searchParams.get("maxPrice") || ""}
-            onChange={e => updateFilter("maxPrice", e.target.value)}
-            className="w-16 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-accent"
-          />
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Search className="w-4 h-4 text-muted shrink-0" />
+            <input
+              type="text"
+              placeholder="ابحث..."
+              value={searchParams.get("q") || ""}
+              onChange={e => updateFilter("q", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+            <select
+              value={searchParams.get("brand") || ""}
+              onChange={e => updateFilter("brand", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="">الماركة</option>
+              {brands.map(b => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <select
+              value={searchParams.get("governorate") || ""}
+              onChange={e => updateFilter("governorate", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="">المدينة</option>
+              {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+            <select
+              value={searchParams.get("fuel_type") || ""}
+              onChange={e => updateFilter("fuel_type", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="">الوقود</option>
+              <option value="بنزين">بنزين</option>
+              <option value="ديزل">ديزل</option>
+              <option value="كهرباء">كهرباء</option>
+              <option value="هايبرد">هايبرد</option>
+            </select>
+            <select
+              value={searchParams.get("transmission") || ""}
+              onChange={e => updateFilter("transmission", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-accent"
+            >
+              <option value="">القير</option>
+              <option value="عادي">عادي</option>
+              <option value="أوتوماتيك">أوتوماتيك</option>
+              <option value="CVT">CVT</option>
+            </select>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="number"
+              placeholder="سعر من"
+              value={searchParams.get("minPrice") || ""}
+              onChange={e => updateFilter("minPrice", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+            <input
+              type="number"
+              placeholder="سعر إلى"
+              value={searchParams.get("maxPrice") || ""}
+              onChange={e => updateFilter("maxPrice", e.target.value)}
+              className="flex-1 min-w-0 rounded-lg border border-border bg-card px-2 py-1.5 text-xs text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-1 focus:ring-accent"
+            />
+          </div>
         </div>
       </div>
     </div>

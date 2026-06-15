@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useCallback } from "react"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, Search } from "lucide-react"
 import { GOVERNORATES } from "@/lib/constants"
 import { getImageUrl } from "@/lib/utils"
 
@@ -106,8 +106,20 @@ export default function HeroSection() {
 
         {/* Filters + Sort Row */}
         <div className="bg-card border border-border rounded-xl p-4 md:p-5 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="space-y-3">
+            {/* Search input */}
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+              <input
+                type="text"
+                placeholder="ابحث عن ماركة, موديل..."
+                value={searchParams.get("q") || ""}
+                onChange={e => updateFilter("q", e.target.value)}
+                className="w-full rounded-lg border border-border bg-background pr-10 px-3 py-2.5 text-sm text-foreground placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
               <select
                 value={searchParams.get("governorate") || ""}
                 onChange={e => updateFilter("governorate", e.target.value)}
@@ -115,6 +127,29 @@ export default function HeroSection() {
               >
                 <option value="">المدينة</option>
                 {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
+              </select>
+
+              <select
+                value={searchParams.get("fuel_type") || ""}
+                onChange={e => updateFilter("fuel_type", e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+              >
+                <option value="">الوقود</option>
+                <option value="بنزين">بنزين</option>
+                <option value="ديزل">ديزل</option>
+                <option value="كهرباء">كهرباء</option>
+                <option value="هايبرد">هايبرد</option>
+              </select>
+
+              <select
+                value={searchParams.get("transmission") || ""}
+                onChange={e => updateFilter("transmission", e.target.value)}
+                className="w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent transition-colors"
+              >
+                <option value="">القير</option>
+                <option value="عادي">عادي</option>
+                <option value="أوتوماتيك">أوتوماتيك</option>
+                <option value="CVT">CVT</option>
               </select>
 
               <input
