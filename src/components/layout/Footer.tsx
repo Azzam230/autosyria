@@ -21,6 +21,7 @@ export default function Footer() {
             <h3 className="font-semibold text-foreground text-sm mb-3">روابط سريعة</h3>
             <ul className="space-y-2">
               <li><Link href="/" className="text-sm text-muted hover:text-accent transition-colors">الرئيسية</Link></li>
+              <li><Link href="/search" className="text-sm text-muted hover:text-accent transition-colors">بحث متقدم</Link></li>
               <li><Link href="/sell" className="text-sm text-muted hover:text-accent transition-colors">بيع سيارتك</Link></li>
             </ul>
           </div>

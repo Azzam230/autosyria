@@ -5,11 +5,11 @@ import { ITEMS_PER_PAGE } from "@/lib/constants"
 import { Car as CarIcon, Database } from "lucide-react"
 
 interface CarGridProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function CarGrid({ searchParams }: CarGridProps) {
-  const params = await searchParams
+  const params = searchParams ? await searchParams : {}
   const supabase = await createClient()
 
   if (!supabase) {

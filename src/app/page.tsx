@@ -13,18 +13,20 @@ export const metadata: Metadata = {
   },
 }
 
-interface PageProps {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
-}
-
-export default function Home({ searchParams }: PageProps) {
+export default function Home() {
   return (
     <div>
       <Suspense fallback={<div className="h-52 animate-pulse bg-card" />}>
         <HeroSection />
       </Suspense>
       <section className="max-w-7xl mx-auto px-4 py-8 pb-16">
-        <CarGrid searchParams={searchParams} />
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-foreground">آخر الإعلانات</h2>
+          <a href="/search" className="text-sm text-accent hover:text-accent-hover font-medium transition-colors">
+            عرض الكل
+          </a>
+        </div>
+        <CarGrid />
       </section>
     </div>
   )
