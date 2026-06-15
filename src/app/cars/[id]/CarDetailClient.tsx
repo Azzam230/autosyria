@@ -5,7 +5,7 @@
 import { useState, useCallback } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Calendar, Gauge, Share2, Check, Copy } from "lucide-react"
+import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Calendar, Gauge, Share2, Check, Copy, Phone } from "lucide-react"
 import { formatPrice } from "@/lib/utils"
 import type { Car } from "@/lib/types"
 
@@ -174,15 +174,37 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
           </div>
         )}
 
+        {c.phone && (
+          <div>
+            <h2 className="text-sm font-semibold text-foreground mb-2">التواصل مع البائع</h2>
+            <a
+              href={`tel:${c.phone}`}
+              dir="ltr"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-card border border-border hover:bg-card-hover transition-colors text-foreground font-medium text-sm"
+            >
+              <Phone className="w-4 h-4 text-accent" />
+              {c.phone}
+            </a>
+          </div>
+        )}
+
         <div className="text-xs text-muted leading-relaxed">
           أعلن رقم {c.ref_number} • تاريخ الإعلان: {new Date(c.created_at).toLocaleDateString("ar-SA")}
-          {c.phone && <> • <span dir="ltr">{c.phone}</span></>}
         </div>
       </div>
 
       {/* Sticky Bottom Bar (Mobile) */}
       <div className="fixed bottom-0 left-0 right-0 md:hidden bg-card border-t border-border p-3 z-40">
         <div className="flex gap-2">
+          {c.phone && (
+            <a
+              href={`tel:${c.phone}`}
+              dir="ltr"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-lg bg-card border border-border text-foreground font-semibold text-sm transition-colors"
+            >
+              <Phone className="w-4 h-4 text-accent" />
+            </a>
+          )}
           <a
             href={whatsappLink}
             target="_blank"

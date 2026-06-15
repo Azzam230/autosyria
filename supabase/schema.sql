@@ -26,8 +26,11 @@ CREATE TABLE IF NOT EXISTS cars (
   phone TEXT,
   images TEXT[] DEFAULT '{}',
   status TEXT DEFAULT 'available' CHECK (status IN ('available', 'sold')),
+  featured BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
+
+CREATE INDEX IF NOT EXISTS idx_cars_featured ON cars (featured DESC, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS sell_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

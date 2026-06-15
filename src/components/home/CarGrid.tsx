@@ -32,7 +32,7 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
   } else if (sort === "price_desc") {
     query = query.order("price", { ascending: false })
   } else {
-    query = query.order("created_at", { ascending: false })
+    query = query.order("featured", { ascending: false }).order("created_at", { ascending: false })
   }
 
   if (params.q) {

@@ -11,6 +11,7 @@ interface CarCardProps {
 
 export default function CarCard({ car, priority = false }: CarCardProps) {
   const imageUrl = car.images?.[0] ? getImageUrl(car.images[0]) : null
+  const isNew = Date.now() - new Date(car.created_at).getTime() < 7 * 24 * 60 * 60 * 1000
 
   return (
     <Link href={`/cars/${car.id}`} className="block">
@@ -31,9 +32,21 @@ export default function CarCard({ car, priority = false }: CarCardProps) {
               <span className="text-muted/20 text-sm">لا توجد صورة</span>
             </div>
           )}
-          {car.status === "sold" && (
-            <div className="absolute top-2 right-2 bg-accent text-white text-[10px] font-semibold px-2 py-0.5 rounded">
-              مباعة
+          <div className="absolute top-2 right-2 flex gap-1.5">
+            {car.featured && (
+              <span className="bg-yellow-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+                مميز
+              </span>
+            )}
+            {car.status === "sold" && (
+              <span className="bg-accent text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+                مباعة
+              </span>
+            )}
+          </div>
+          {isNew && car.status === "available" && (
+            <div className="absolute top-2 left-2 bg-green-500 text-white text-[10px] font-semibold px-2 py-0.5 rounded">
+              جديد
             </div>
           )}
         </div>
