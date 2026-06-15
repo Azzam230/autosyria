@@ -20,7 +20,7 @@ export interface Car {
   phone: string | null
   images: string[]
   status: CarStatus
-  featured: boolean
+  featured?: boolean
   created_at: string
 }
 
