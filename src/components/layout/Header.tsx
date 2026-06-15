@@ -53,12 +53,6 @@ export default function Header() {
             </div>
 
             <div className="flex items-center gap-1 mr-2 pr-2 border-r border-border">
-              <Link
-                href="/admin/dashboard"
-                className="px-3 py-1.5 text-sm text-muted hover:text-foreground transition-colors rounded-lg hover:bg-card-hover"
-              >
-                لوحة التحكم
-              </Link>
               <div className="mr-1">
                 <ThemeToggle />
               </div>
