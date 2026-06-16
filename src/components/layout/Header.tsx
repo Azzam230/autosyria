@@ -6,6 +6,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Search, PlusCircle } from "lucide-react"
 import { SITE_NAME } from "@/lib/constants"
+import ThemeToggle from "@/components/theme/ThemeToggle"
 
 export default function Header() {
   const router = useRouter()
@@ -36,13 +37,26 @@ export default function Header() {
               priority
             />
           </Link>
-          <Link
-            href="/sell"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-semibold"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            بيع سيارتك
-          </Link>
+          <div className="flex md:hidden items-center gap-1">
+            <ThemeToggle />
+            <Link
+              href="/sell"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 text-accent text-xs font-semibold"
+            >
+              <PlusCircle className="w-3.5 h-3.5" />
+              بيع سيارتك
+            </Link>
+          </div>
+          <div className="hidden md:flex items-center gap-1">
+            <Link
+              href="/sell"
+              className="flex items-center gap-1.5 shrink-0 px-3.5 py-2 rounded-xl bg-accent/10 text-accent hover:bg-accent/20 text-sm font-semibold transition-colors"
+            >
+              <PlusCircle className="w-4 h-4" />
+              بيع سيارتك
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
 

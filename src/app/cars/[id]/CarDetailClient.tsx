@@ -1,11 +1,9 @@
 "use client"
 
-"use client"
-
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Calendar, Gauge, Share2, Check, Copy, Phone } from "lucide-react"
+import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Calendar, Gauge, Share2, Check, Copy, Phone, X } from "lucide-react"
 import { formatPrice } from "@/lib/utils"
 import type { Car } from "@/lib/types"
 
@@ -20,6 +18,7 @@ interface CarDetailClientProps {
 export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUrl, shareText }: CarDetailClientProps) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [copied, setCopied] = useState(false)
+  const [showGallery, setShowGallery] = useState(false)
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
@@ -38,6 +37,18 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
       setTimeout(() => setCopied(false), 2000)
     }
   }, [carUrl, shareText])
+
+  // Keyboard navigation for gallery
+  useEffect(() => {
+    if (!showGallery) return
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setShowGallery(false)
+      if (e.key === "ArrowRight") setActiveIndex(i => (i > 0 ? i - 1 : imageUrls.length - 1))
+      if (e.key === "ArrowLeft") setActiveIndex(i => (i < imageUrls.length - 1 ? i + 1 : 0))
+    }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [showGallery, imageUrls.length])
 
   const specs = [
     { label: "الماركة", value: c.brand },
@@ -59,14 +70,16 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
         <div className="max-w-5xl mx-auto relative">
           <div className="relative w-full h-[45vh] md:h-[55vh] flex items-center justify-center bg-muted/10">
             {imageUrls.length > 0 ? (
-              <Image
-                src={imageUrls[activeIndex]}
-                alt={`${c.brand} ${c.model} ${c.year}`}
-                fill
-                className="object-contain p-2"
-                priority
-                sizes="(max-width: 768px) 100vw, 80vw"
-              />
+              <button onClick={() => setShowGallery(true)} className="w-full h-full relative cursor-zoom-in">
+                <Image
+                  src={imageUrls[activeIndex]}
+                  alt={`${c.brand} ${c.model} ${c.year}`}
+                  fill
+                  className="object-contain p-2"
+                  priority
+                  sizes="(max-width: 768px) 100vw, 80vw"
+                />
+              </button>
             ) : (
               <div className="w-full h-full flex items-center justify-center">
                 <span className="text-muted/30">لا توجد صورة</span>
@@ -249,6 +262,57 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
           </button>
         </div>
       </div>
+
+      {/* Full-screen Gallery Modal */}
+      {showGallery && (
+        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col">
+          <div className="flex items-center justify-between p-4 shrink-0">
+            <button onClick={() => setShowGallery(false)} className="text-white/80 hover:text-white transition-colors">
+              <X className="w-6 h-6" />
+            </button>
+            <span className="text-white/60 text-sm">{activeIndex + 1} / {imageUrls.length}</span>
+          </div>
+          <div className="flex-1 relative flex items-center justify-center">
+            <Image
+              src={imageUrls[activeIndex]}
+              alt={`${c.brand} ${c.model} ${c.year} - صورة ${activeIndex + 1}`}
+              fill
+              className="object-contain p-4"
+              sizes="100vw"
+              priority
+            />
+            {imageUrls.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveIndex(i => (i > 0 ? i - 1 : imageUrls.length - 1))}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
+                <button
+                  onClick={() => setActiveIndex(i => (i < imageUrls.length - 1 ? i + 1 : 0))}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+              </>
+            )}
+          </div>
+          {imageUrls.length > 1 && (
+            <div className="flex gap-2 p-4 overflow-x-auto justify-center shrink-0">
+              {imageUrls.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`relative w-14 h-10 rounded-md overflow-hidden shrink-0 transition-all ${i === activeIndex ? "ring-2 ring-white opacity-100" : "opacity-50 hover:opacity-80"}`}
+                >
+                  <Image src={url} alt="" fill className="object-cover" sizes="56px" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -5,6 +5,7 @@ import { WHATSAPP_NUMBER } from "@/lib/constants"
 import type { Metadata } from "next"
 import type { Car } from "@/lib/types"
 import CarDetailClient from "./CarDetailClient"
+import SimilarCars from "@/components/cars/SimilarCars"
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -58,5 +59,10 @@ export default async function CarDetailPage({ params }: PageProps) {
   const shareText = `سيارة ${c.brand} ${c.model} ${c.year} - ${formatPrice(c.price)} في ${c.governorate}، سوريا`
   const whatsappLink = generateWhatsAppLink(WHATSAPP_NUMBER, c.brand, c.model, c.year, c.price, c.ref_number, carUrl)
 
-  return <CarDetailClient car={c} imageUrls={imageUrls} whatsappLink={whatsappLink} carUrl={carUrl} shareText={shareText} />
+  return (
+    <>
+      <CarDetailClient car={c} imageUrls={imageUrls} whatsappLink={whatsappLink} carUrl={carUrl} shareText={shareText} />
+      <SimilarCars currentCar={c} />
+    </>
+  )
 }
