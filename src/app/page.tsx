@@ -4,6 +4,8 @@ import HeroSection from "@/components/home/HeroSection"
 import CarGrid from "@/components/home/CarGrid"
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants"
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: SITE_NAME,
   description: SITE_DESCRIPTION,
