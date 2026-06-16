@@ -4,11 +4,11 @@ import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
 async function getAuthSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key || key === "your_supabase_anon_key_here") return null
   const cookieStore = await cookies()
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  return createServerClient(url, key, {
       cookies: {
         getAll() { return cookieStore.getAll() },
         setAll() {},
@@ -18,14 +18,16 @@ async function getAuthSupabase() {
 }
 
 function getPublicSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key || key === "your_supabase_anon_key_here") return null
+  return createClient(url, key)
 }
 
 export async function GET() {
-  const { data, error } = await getPublicSupabase().from("brands").select("*").order("name")
+  const supabase = getPublicSupabase()
+  if (!supabase) return NextResponse.json([])
+  const { data, error } = await supabase.from("brands").select("*").order("name")
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data)
 }
@@ -33,6 +35,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const supabase = await getAuthSupabase()
+    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
@@ -58,6 +61,7 @@ export async function POST(request: Request) {
 export async function PUT(request: Request) {
   try {
     const supabase = await getAuthSupabase()
+    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
@@ -84,6 +88,7 @@ export async function PUT(request: Request) {
 export async function DELETE(request: Request) {
   try {
     const supabase = await getAuthSupabase()
+    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
