@@ -55,7 +55,31 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
 
   query = query.range(from, to)
 
-  const { data: cars, count } = await query
+  let cars: Car[] | null = null
+  let count: number | null = null
+
+  try {
+    const result = await query
+    cars = result.data as Car[] | null
+    count = result.count
+  } catch {
+    // Retry without featured order (column may not exist yet)
+    let fallback = supabase.from("cars").select("*", { count: "exact" }).eq("status", "available")
+    if (sort === "price_asc") fallback = fallback.order("price", { ascending: true })
+    else if (sort === "price_desc") fallback = fallback.order("price", { ascending: false })
+    else fallback = fallback.order("created_at", { ascending: false })
+    if (params.q) { const q = params.q as string; fallback = fallback.or(`brand.ilike.%${q}%,model.ilike.%${q}%`) }
+    if (params.brand) fallback = fallback.eq("brand", params.brand)
+    if (params.governorate) fallback = fallback.eq("governorate", params.governorate)
+    if (params.fuel_type) fallback = fallback.eq("fuel_type", params.fuel_type)
+    if (params.transmission) fallback = fallback.eq("transmission", params.transmission)
+    if (params.minPrice) fallback = fallback.gte("price", Number(params.minPrice))
+    if (params.maxPrice) fallback = fallback.lte("price", Number(params.maxPrice))
+    fallback = fallback.range(from, to)
+    const result = await fallback
+    cars = result.data as Car[] | null
+    count = result.count
+  }
 
   if (!cars || cars.length === 0) {
     const hasFilters = params.q || params.brand || params.governorate || params.fuel_type || params.transmission || params.minPrice || params.maxPrice
