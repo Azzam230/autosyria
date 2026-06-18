@@ -2,42 +2,40 @@ import { createClient } from "@/lib/supabase/server"
 import type { Car } from "@/lib/types"
 import CarCard from "./CarCard"
 import { ITEMS_PER_PAGE } from "@/lib/constants"
-import { Car as CarIcon, Database } from "lucide-react"
+import { Car as CarIcon, AlertCircle } from "lucide-react"
 
 interface CarGridProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function CarGrid({ searchParams }: CarGridProps) {
+  let params: { [key: string]: string | string[] | undefined } = {}
   try {
-    const params = searchParams ? await searchParams : {}
-    const supabase = await createClient()
+    params = searchParams ? await searchParams : {}
+  } catch {
+    // ignore invalid searchParams
+  }
 
-    if (!supabase) {
-      return (
-        <div className="flex flex-col items-center justify-center py-16 gap-3">
-          <Database className="w-12 h-12 text-muted/30" />
-          <p className="text-muted">في انتظار الاتصال بقاعدة البيانات</p>
-        </div>
-      )
-    }
+  const supabase = await createClient()
 
+  if (!supabase) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <p className="text-muted">في انتظار الاتصال بقاعدة البيانات</p>
+      </div>
+    )
+  }
+
+  try {
     let query = supabase
       .from("cars")
       .select("*", { count: "exact" })
       .eq("status", "available")
 
     const sort = (params.sort as string) || "newest"
-
-    query = query.order("featured", { ascending: false })
-
-    if (sort === "price_asc") {
-      query = query.order("price", { ascending: true })
-    } else if (sort === "price_desc") {
-      query = query.order("price", { ascending: false })
-    } else {
-      query = query.order("created_at", { ascending: false })
-    }
+    if (sort === "price_asc") query = query.order("price", { ascending: true })
+    else if (sort === "price_desc") query = query.order("price", { ascending: false })
+    else query = query.order("created_at", { ascending: false })
 
     if (params.q) {
       const q = params.q as string
@@ -50,40 +48,24 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     if (params.minPrice) query = query.gte("price", Number(params.minPrice))
     if (params.maxPrice) query = query.lte("price", Number(params.maxPrice))
 
-    const page = Number(params.page) || 1
+    const page = Math.max(1, Number(params.page) || 1)
     const from = (page - 1) * ITEMS_PER_PAGE
     const to = from + ITEMS_PER_PAGE - 1
 
-    query = query.range(from, to)
+    const { data: cars, error, count } = await query.range(from, to)
 
-    let cars: Car[] | null = null
-    let count: number | null = null
-
-    const result = await query
-    if (result.error) {
-      // Retry without featured order (column may not exist yet)
-      let fallback = supabase.from("cars").select("*", { count: "exact" }).eq("status", "available")
-      if (sort === "price_asc") fallback = fallback.order("price", { ascending: true })
-      else if (sort === "price_desc") fallback = fallback.order("price", { ascending: false })
-      else fallback = fallback.order("created_at", { ascending: false })
-      if (params.q) { const q = params.q as string; fallback = fallback.or(`brand.ilike.%${q}%,model.ilike.%${q}%`) }
-      if (params.brand) fallback = fallback.eq("brand", params.brand)
-      if (params.governorate) fallback = fallback.eq("governorate", params.governorate)
-      if (params.fuel_type) fallback = fallback.eq("fuel_type", params.fuel_type)
-      if (params.transmission) fallback = fallback.eq("transmission", params.transmission)
-      if (params.minPrice) fallback = fallback.gte("price", Number(params.minPrice))
-      if (params.maxPrice) fallback = fallback.lte("price", Number(params.maxPrice))
-      fallback = fallback.range(from, to)
-      const fb = await fallback
-      cars = fb.data as Car[] | null
-      count = fb.count
-    } else {
-      cars = result.data as Car[] | null
-      count = result.count
+    if (error) {
+      console.error("CarGrid query error:", error.message)
+      return (
+        <div className="flex flex-col items-center justify-center py-16 gap-3">
+          <AlertCircle className="w-10 h-10 text-muted/30" />
+          <p className="text-muted">تعذر تحميل الإعلانات. حاول مرة أخرى لاحقاً.</p>
+        </div>
+      )
     }
 
     if (!cars || cars.length === 0) {
-      const hasFilters = params.q || params.brand || params.governorate || params.fuel_type || params.transmission || params.minPrice || params.maxPrice
+      const hasFilters = !!(params.q || params.brand || params.governorate || params.fuel_type || params.transmission || params.minPrice || params.maxPrice)
       return (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <CarIcon className="w-12 h-12 text-muted/30" />
@@ -106,10 +88,13 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
           <div className="flex items-center justify-center gap-2 mt-8">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => {
               const isActive = p === page
+              const hrefParams = new URLSearchParams()
+              Object.entries(params).forEach(([k, v]) => { if (v && typeof v === "string") hrefParams.set(k, v) })
+              hrefParams.set("page", String(p))
               return (
                 <a
                   key={p}
-                  href={`/?${new URLSearchParams({ ...Object.fromEntries(Object.entries(params).filter(([_, v]) => v)), page: String(p) }).toString()}`}
+                  href={`/?${hrefParams.toString()}`}
                   className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${isActive ? "bg-accent text-white" : "bg-card text-muted hover:text-foreground border border-border"}`}
                 >
                   {p}
@@ -120,9 +105,11 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
         )}
       </div>
     )
-  } catch {
+  } catch (err) {
+    console.error("CarGrid render error:", err instanceof Error ? err.message : err)
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
+        <AlertCircle className="w-10 h-10 text-muted/30" />
         <p className="text-muted">تعذر تحميل الإعلانات. حاول مرة أخرى لاحقاً.</p>
       </div>
     )
