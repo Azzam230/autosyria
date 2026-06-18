@@ -6,7 +6,8 @@ import { createServerClient } from "@supabase/ssr"
 async function getAuthSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key || key === "your_supabase_anon_key_here") return null
+  console.log("[api/brands] getAuthSupabase - URL exists:", !!url, "KEY exists:", !!key)
+  if (!url || !key || key === "your_supabase_anon_key_here") { console.log("[api/brands] getAuthSupabase: returning null"); return null }
   const cookieStore = await cookies()
   return createServerClient(url, key, {
       cookies: {
@@ -20,15 +21,19 @@ async function getAuthSupabase() {
 function getPublicSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !key || key === "your_supabase_anon_key_here") return null
+  console.log("[api/brands] getPublicSupabase - URL:", url?.substring(0, 30)+"...", "KEY starts with:", key?.substring(0, 20)+"...")
+  if (!url || !key || key === "your_supabase_anon_key_here") { console.log("[api/brands] getPublicSupabase: returning null"); return null }
   return createClient(url, key)
 }
 
 export async function GET() {
+  console.log("[api/brands] GET called")
   const supabase = getPublicSupabase()
-  if (!supabase) return NextResponse.json([])
+  if (!supabase) { console.log("[api/brands] supabase null, returning []"); return NextResponse.json([]) }
+  console.log("[api/brands] Executing query...")
   const { data, error } = await supabase.from("brands").select("*").order("name")
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) { console.error("[api/brands] QUERY ERROR:", error.message, error.code); return NextResponse.json({ error: error.message }, { status: 500 }) }
+  console.log("[api/brands] Success, brands:", data?.length)
   return NextResponse.json(data)
 }
 

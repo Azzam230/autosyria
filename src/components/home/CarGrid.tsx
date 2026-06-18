@@ -9,16 +9,20 @@ interface CarGridProps {
 }
 
 export default async function CarGrid({ searchParams }: CarGridProps) {
+  console.log("[CarGrid] START")
   let params: { [key: string]: string | string[] | undefined } = {}
   try {
     params = searchParams ? await searchParams : {}
+    console.log("[CarGrid] searchParams:", JSON.stringify(params))
   } catch {
-    // ignore invalid searchParams
+    console.log("[CarGrid] searchParams parse FAILED")
   }
 
+  console.log("[CarGrid] Calling createClient()...")
   const supabase = await createClient()
 
   if (!supabase) {
+    console.log("[CarGrid] supabase is NULL - showing waiting message")
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
         <p className="text-muted">في انتظار الاتصال بقاعدة البيانات</p>
@@ -26,36 +30,44 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     )
   }
 
+  console.log("[CarGrid] supabase client OK, building query...")
+
   try {
     let query = supabase
       .from("cars")
       .select("*", { count: "exact" })
       .eq("status", "available")
+    console.log("[CarGrid] Base query built")
 
     const sort = (params.sort as string) || "newest"
+    console.log("[CarGrid] sort:", sort)
     if (sort === "price_asc") query = query.order("price", { ascending: true })
     else if (sort === "price_desc") query = query.order("price", { ascending: false })
     else query = query.order("created_at", { ascending: false })
+    console.log("[CarGrid] order applied")
 
     if (params.q) {
       const q = params.q as string
       query = query.or(`brand.ilike.%${q}%,model.ilike.%${q}%`)
+      console.log("[CarGrid] filter q:", q)
     }
-    if (params.brand) query = query.eq("brand", params.brand)
-    if (params.governorate) query = query.eq("governorate", params.governorate)
-    if (params.fuel_type) query = query.eq("fuel_type", params.fuel_type)
-    if (params.transmission) query = query.eq("transmission", params.transmission)
-    if (params.minPrice) query = query.gte("price", Number(params.minPrice))
-    if (params.maxPrice) query = query.lte("price", Number(params.maxPrice))
+    if (params.brand) { query = query.eq("brand", params.brand); console.log("[CarGrid] filter brand:", params.brand) }
+    if (params.governorate) { query = query.eq("governorate", params.governorate); console.log("[CarGrid] filter governorate:", params.governorate) }
+    if (params.fuel_type) { query = query.eq("fuel_type", params.fuel_type); console.log("[CarGrid] filter fuel_type:", params.fuel_type) }
+    if (params.transmission) { query = query.eq("transmission", params.transmission); console.log("[CarGrid] filter transmission:", params.transmission) }
+    if (params.minPrice) { query = query.gte("price", Number(params.minPrice)); console.log("[CarGrid] filter minPrice:", params.minPrice) }
+    if (params.maxPrice) { query = query.lte("price", Number(params.maxPrice)); console.log("[CarGrid] filter maxPrice:", params.maxPrice) }
 
     const page = Math.max(1, Number(params.page) || 1)
     const from = (page - 1) * ITEMS_PER_PAGE
     const to = from + ITEMS_PER_PAGE - 1
 
+    console.log("[CarGrid] Executing query, page:", page, "range:", from, "-", to)
     const { data: cars, error, count } = await query.range(from, to)
+    console.log("[CarGrid] Query result - error:", error?.message, "count:", count, "cars:", cars?.length)
 
     if (error) {
-      console.error("CarGrid query error:", error.message)
+      console.error("[CarGrid] QUERY ERROR:", error.message, error.code, error.details, error.hint)
       return (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <AlertCircle className="w-10 h-10 text-muted/30" />
@@ -65,6 +77,7 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     }
 
     if (!cars || cars.length === 0) {
+      console.log("[CarGrid] No cars returned")
       const hasFilters = !!(params.q || params.brand || params.governorate || params.fuel_type || params.transmission || params.minPrice || params.maxPrice)
       return (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
@@ -106,7 +119,7 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
       </div>
     )
   } catch (err) {
-    console.error("CarGrid render error:", err instanceof Error ? err.message : err)
+    console.error("[CarGrid] CATCH ERROR:", err instanceof Error ? err.message : err, err instanceof Error ? err.stack : "")
     return (
       <div className="flex flex-col items-center justify-center py-16 gap-3">
         <AlertCircle className="w-10 h-10 text-muted/30" />
