@@ -59,11 +59,8 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     let cars: Car[] | null = null
     let count: number | null = null
 
-    try {
-      const result = await query
-      cars = result.data as Car[] | null
-      count = result.count
-    } catch {
+    const result = await query
+    if (result.error) {
       // Retry without featured order (column may not exist yet)
       let fallback = supabase.from("cars").select("*", { count: "exact" }).eq("status", "available")
       if (sort === "price_asc") fallback = fallback.order("price", { ascending: true })
@@ -77,7 +74,10 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
       if (params.minPrice) fallback = fallback.gte("price", Number(params.minPrice))
       if (params.maxPrice) fallback = fallback.lte("price", Number(params.maxPrice))
       fallback = fallback.range(from, to)
-      const result = await fallback
+      const fb = await fallback
+      cars = fb.data as Car[] | null
+      count = fb.count
+    } else {
       cars = result.data as Car[] | null
       count = result.count
     }
