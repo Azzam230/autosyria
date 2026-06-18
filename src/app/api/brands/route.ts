@@ -4,8 +4,9 @@ import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
 async function getAuthSupabase() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
   console.log("[api/brands] getAuthSupabase - URL exists:", !!url, "KEY exists:", !!key)
   if (!url || !key || key === "your_supabase_anon_key_here") { console.log("[api/brands] getAuthSupabase: returning null"); return null }
   const cookieStore = await cookies()
@@ -23,7 +24,8 @@ function getPublicSupabase() {
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   console.log("[api/brands] getPublicSupabase - URL:", url?.substring(0, 30)+"...", "KEY starts with:", key?.substring(0, 20)+"...")
   if (!url || !key || key === "your_supabase_anon_key_here") { console.log("[api/brands] getPublicSupabase: returning null"); return null }
-  return createClient(url, key)
+  const baseUrl = url.replace(/\/rest\/v1\/?$/, '')
+  return createClient(baseUrl, key)
 }
 
 export async function GET() {

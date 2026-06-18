@@ -2,8 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 export async function createClient() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseUrlRaw = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const supabaseUrl = supabaseUrlRaw?.replace(/\/rest\/v1\/?$/, '')
 
   console.log("[supabase/server] URL:", supabaseUrl?.substring(0, 30) + "...")
   console.log("[supabase/server] KEY exists:", !!supabaseKey)
