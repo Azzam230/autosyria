@@ -48,7 +48,13 @@ export default async function CarDetailPage({ params }: PageProps) {
 
   if (!supabase) notFound()
 
-  const { data: car } = await supabase.from("cars").select("*").eq("id", id).single()
+  let car: Car | null = null
+  try {
+    const { data } = await supabase.from("cars").select("*").eq("id", id).single()
+    car = data as Car | null
+  } catch {
+    notFound()
+  }
 
   if (!car || car.status !== "available") notFound()
 

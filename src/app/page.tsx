@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Suspense } from "react"
 import HeroSection from "@/components/home/HeroSection"
 import CarGrid from "@/components/home/CarGrid"
+import ErrorBoundary from "@/components/ui/ErrorBoundary"
 import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants"
 
 export const dynamic = 'force-dynamic'
@@ -28,7 +29,13 @@ export default function Home() {
             عرض الكل
           </a>
         </div>
-        <CarGrid />
+        <ErrorBoundary fallback={
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <p className="text-muted">تعذر تحميل الإعلانات. حاول مرة أخرى لاحقاً.</p>
+          </div>
+        }>
+          <CarGrid />
+        </ErrorBoundary>
       </section>
     </div>
   )

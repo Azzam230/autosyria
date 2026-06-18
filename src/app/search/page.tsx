@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { Suspense } from "react"
 import CarGrid from "@/components/home/CarGrid"
+import ErrorBoundary from "@/components/ui/ErrorBoundary"
 import SearchFilters from "./SearchFilters"
 import SearchInput from "./SearchInput"
 
@@ -33,22 +34,28 @@ export default async function SearchPage({ searchParams }: PageProps) {
       </Suspense>
 
       <div>
-        <Suspense fallback={
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
-                <div className="aspect-[16/9] bg-muted/20 animate-pulse" />
-                <div className="p-3 space-y-3">
-                  <div className="h-5 w-24 bg-muted/20 rounded animate-pulse" />
-                  <div className="h-4 w-40 bg-muted/20 rounded animate-pulse" />
-                  <div className="h-3 w-32 bg-muted/20 rounded animate-pulse" />
-                </div>
-              </div>
-            ))}
+        <ErrorBoundary fallback={
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <p className="text-muted">تعذر تحميل النتائج. حاول مرة أخرى لاحقاً.</p>
           </div>
         }>
-          <CarGrid searchParams={Promise.resolve(params)} />
-        </Suspense>
+          <Suspense fallback={
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
+                  <div className="aspect-[16/9] bg-muted/20 animate-pulse" />
+                  <div className="p-3 space-y-3">
+                    <div className="h-5 w-24 bg-muted/20 rounded animate-pulse" />
+                    <div className="h-4 w-40 bg-muted/20 rounded animate-pulse" />
+                    <div className="h-3 w-32 bg-muted/20 rounded animate-pulse" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          }>
+            <CarGrid searchParams={Promise.resolve(params)} />
+          </Suspense>
+        </ErrorBoundary>
       </div>
     </div>
   )
