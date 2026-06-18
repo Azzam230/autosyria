@@ -19,6 +19,23 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
   const [activeIndex, setActiveIndex] = useState(0)
   const [copied, setCopied] = useState(false)
   const [showGallery, setShowGallery] = useState(false)
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX)
+  }, [])
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStart === null) return
+    const delta = touchStart - e.changedTouches[0].clientX
+    setTouchStart(null)
+    if (Math.abs(delta) < 50) return
+    if (delta > 0) {
+      setActiveIndex(i => (i < imageUrls.length - 1 ? i + 1 : 0))
+    } else {
+      setActiveIndex(i => (i > 0 ? i - 1 : imageUrls.length - 1))
+    }
+  }, [touchStart, imageUrls.length])
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {
@@ -70,7 +87,7 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
         <div className="max-w-5xl mx-auto relative">
           <div className="relative w-full h-[45vh] md:h-[55vh] flex items-center justify-center bg-muted/10">
             {imageUrls.length > 0 ? (
-              <button onClick={() => setShowGallery(true)} className="w-full h-full relative cursor-zoom-in">
+              <button onClick={() => setShowGallery(true)} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="w-full h-full relative cursor-zoom-in">
                 <Image
                   src={imageUrls[activeIndex]}
                   alt={`${c.brand} ${c.model} ${c.year}`}
@@ -272,7 +289,7 @@ export default function CarDetailClient({ car: c, imageUrls, whatsappLink, carUr
             </button>
             <span className="text-white/60 text-sm">{activeIndex + 1} / {imageUrls.length}</span>
           </div>
-          <div className="flex-1 relative flex items-center justify-center">
+          <div onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} className="flex-1 relative flex items-center justify-center">
             <Image
               src={imageUrls[activeIndex]}
               alt={`${c.brand} ${c.model} ${c.year} - صورة ${activeIndex + 1}`}
