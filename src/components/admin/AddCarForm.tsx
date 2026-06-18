@@ -76,6 +76,7 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
       color: form.get("color") as string || null,
       description: form.get("description") as string || null,
       phone: form.get("phone") as string || null,
+      featured: form.get("featured") === "on",
     }
 
     const supabase = getSupabase()
@@ -166,7 +167,10 @@ export default function AddCarForm({ open, onClose, onSuccess }: AddCarFormProps
         </div>
         <textarea name="description" rows={3} placeholder="وصف السيارة (اختياري)" className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-foreground text-sm placeholder:text-muted/60 focus:outline-none focus:ring-2 focus:ring-accent" />
 
-        
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" name="featured" className="w-4 h-4 rounded border-border text-accent focus:ring-accent" />
+          <span className="text-sm text-foreground">مميز</span>
+        </label>
 
         <div>
           <label className="text-sm font-medium text-foreground block mb-1.5">صور السيارة</label>

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { MapPin, Gauge, Calendar } from "lucide-react"
+import { MapPin, Gauge, Calendar, MessageCircle } from "lucide-react"
 import { formatPrice, getImageUrl } from "@/lib/utils"
 import type { Car as CarType } from "@/lib/types"
 
@@ -52,8 +52,22 @@ export default function CarCard({ car, priority = false }: CarCardProps) {
         </div>
 
         <div className="p-3 space-y-2">
-          <div className="text-[15px] md:text-lg font-bold text-foreground leading-tight">
-            {formatPrice(car.price)}
+          <div className="flex items-center justify-between">
+            <div className="text-[15px] md:text-lg font-bold text-foreground leading-tight">
+              {formatPrice(car.price)}
+            </div>
+            {car.phone && (
+              <a
+                href={`https://wa.me/963${car.phone.replace(/^0+/, "")}?text=${encodeURIComponent(`مرحباً، أريد الاستفسار عن ${car.brand} ${car.model} ${car.year} على Auto Syria`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={e => e.stopPropagation()}
+                className="flex items-center gap-1 text-green-500 hover:text-green-600 transition-colors text-xs font-medium"
+              >
+                <MessageCircle className="w-4 h-4" />
+                <span className="hidden sm:inline">واتساب</span>
+              </a>
+            )}
           </div>
 
           <h3 className="text-sm md:text-[15px] font-medium text-foreground/80 leading-snug line-clamp-1">

@@ -27,6 +27,9 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
     .eq("status", "available")
 
   const sort = (params.sort as string) || "newest"
+
+  query = query.order("featured", { ascending: false })
+
   if (sort === "price_asc") {
     query = query.order("price", { ascending: true })
   } else if (sort === "price_desc") {
