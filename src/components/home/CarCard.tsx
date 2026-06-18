@@ -58,7 +58,7 @@ export default function CarCard({ car, priority = false }: CarCardProps) {
             </div>
             {car.phone && (
               <a
-                href={`https://wa.me/963${car.phone.replace(/^0+/, "")}?text=${encodeURIComponent(`مرحباً، أريد الاستفسار عن ${car.brand} ${car.model} ${car.year} على Auto Syria`)}`}
+                href={`https://wa.me/963${car.phone.replace(/^0+/, "")}?text=${encodeURIComponent(`مرحباً، أريد الاستفسار عن ${car.brand} ${car.model} ${car.year} على SiwdaCars`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={e => e.stopPropagation()}

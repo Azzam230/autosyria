@@ -68,7 +68,7 @@ export default function AdminLoginPage() {
             {error && (
               <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm">{error}</div>
             )}
-            <Input name="email" label="البريد الإلكتروني" type="email" placeholder="admin@autosyria.com" dir="ltr" required />
+            <Input name="email" label="البريد الإلكتروني" type="email" placeholder="admin@siwdacars.com" dir="ltr" required />
             <Input name="password" label="كلمة المرور" type="password" placeholder="••••••••" dir="ltr" required />
             <Button type="submit" size="lg" loading={loading} className="w-full">دخول</Button>
           </form>

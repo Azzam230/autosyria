@@ -14,7 +14,7 @@ export default function Footer() {
               <span className="font-bold text-foreground">{SITE_NAME}</span>
             </div>
             <p className="text-sm text-muted leading-relaxed">
-              أول منصة عربية متخصصة في بيع وشراء السيارات في سوريا. نقدم لك أفضل العروض من جميع المحافظات.
+              أول منصة متخصصة في بيع وشراء السيارات في السويداء. نقدم لك أفضل العروض محلياً.
             </p>
           </div>
           <div>

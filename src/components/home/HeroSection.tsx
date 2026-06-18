@@ -45,7 +45,7 @@ export default function HeroSection() {
             ابحث عن سيارتك المثالية
           </h1>
           <p className="text-muted text-sm md:text-base mb-8 max-w-lg mx-auto leading-relaxed">
-            آلاف الإعلانات من جميع المحافظات السورية. وفر وقتك وتصفح بسهولة.
+            آلاف الإعلانات من السويداء. وفر وقتك وتصفح بسهولة.
           </p>
 
           <form onSubmit={handleSearch} className="flex items-center gap-2 max-w-xl mx-auto">

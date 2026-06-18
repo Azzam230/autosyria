@@ -7,12 +7,12 @@ import { SITE_NAME, SITE_DESCRIPTION } from "@/lib/constants"
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: SITE_NAME,
-  description: SITE_DESCRIPTION,
-  openGraph: {
-    title: `${SITE_NAME} | سوق السيارات في سوريا`,
+    title: SITE_NAME,
     description: SITE_DESCRIPTION,
-  },
+    openGraph: {
+      title: `${SITE_NAME} | سوق السيارات في السويداء`,
+      description: SITE_DESCRIPTION,
+    },
 }
 
 export default function Home() {

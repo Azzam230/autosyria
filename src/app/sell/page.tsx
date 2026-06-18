@@ -3,10 +3,10 @@ import SellPageClient from "./PageClient"
 
 export const metadata: Metadata = {
   title: "بيع سيارتك الآن",
-  description: "بيع سيارتك في سوريا بسهولة عبر Auto Syria. املأ النموذج وسنقوم بالتواصل معك في أقرب وقت.",
+  description: "بيع سيارتك في السويداء بسهولة عبر SiwdaCars. املأ النموذج وسنقوم بالتواصل معك في أقرب وقت.",
   openGraph: {
-    title: "بيع سيارتك الآن | Auto Syria",
-    description: "بيع سيارتك في سوريا بسهولة عبر Auto Syria. املأ النموذج وسنقوم بالتواصل معك في أقرب وقت.",
+    title: "بيع سيارتك الآن | SiwdaCars",
+    description: "بيع سيارتك في السويداء بسهولة عبر SiwdaCars. املأ النموذج وسنقوم بالتواصل معك في أقرب وقت.",
   },
 }
 

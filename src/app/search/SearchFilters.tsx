@@ -105,7 +105,7 @@ export default function SearchFilters() {
         onChange={e => updateFilter("governorate", e.target.value)}
         className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-colors"
       >
-        <option value="">جميع المحافظات</option>
+        <option value="">جميع المناطق</option>
         {GOVERNORATES.map(g => <option key={g} value={g}>{g}</option>)}
       </select>
 

@@ -10,7 +10,7 @@ const alexandria = Alexandria({
   display: "swap",
 })
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://autosyria.com"
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://siwdacars.com"
 
 export const viewport: Viewport = {
   themeColor: "#D61A22",
@@ -18,23 +18,23 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "Auto Syria | سوق السيارات في سوريا",
-    template: "%s | Auto Syria",
+    default: "SiwdaCars | أول منصة سيارات في السويداء",
+    template: "%s | SiwdaCars",
   },
-  description: "سوق السيارات الأول في سوريا - بيع وشراء السيارات المستعملة والجديدة في جميع المحافظات السورية",
-  keywords: ["سيارات", "سوق السيارات", "سوريا", "بيع سيارات", "شراء سيارات", "auto Syria", "car market Syria"],
+  description: "أول منصة متخصصة في بيع وشراء السيارات في السويداء - تصفح أحدث إعلانات السيارات المتوفرة للبيع في محافظة السويداء",
+  keywords: ["سيارات", "سوق السيارات", "السويداء", "بيع سيارات", "شراء سيارات", "SiwdaCars", "سيارات السويداء"],
   metadataBase: new URL(baseUrl),
   openGraph: {
     type: "website",
     locale: "ar_SY",
-    siteName: "Auto Syria",
-    title: "Auto Syria | سوق السيارات في سوريا",
-    description: "سوق السيارات الأول في سوريا - بيع وشراء السيارات المستعملة والجديدة",
+    siteName: "SiwdaCars",
+    title: "SiwdaCars | أول منصة سيارات في السويداء",
+    description: "أول منصة متخصصة في بيع وشراء السيارات في السويداء - تصفح أحدث الإعلانات",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Auto Syria | سوق السيارات في سوريا",
-    description: "سوق السيارات الأول في سوريا - بيع وشراء السيارات المستعملة والجديدة",
+    title: "SiwdaCars | أول منصة سيارات في السويداء",
+    description: "أول منصة متخصصة في بيع وشراء السيارات في السويداء",
   },
   icons: {
     icon: "/logo.png",

@@ -6,7 +6,7 @@ export default function NotFound() {
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
       <div className="text-8xl font-bold text-accent/20 mb-4">404</div>
       <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">الصفحة غير موجودة</h1>
-      <p className="text-muted max-w-md mb-8">عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها. تصفح أحدث إعلانات السيارات في سوريا.</p>
+      <p className="text-muted max-w-md mb-8">عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها. تصفح أحدث إعلانات السيارات في السويداء.</p>
       <div className="flex flex-col sm:flex-row gap-3">
         <Link
           href="/"

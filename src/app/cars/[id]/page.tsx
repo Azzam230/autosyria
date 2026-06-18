@@ -14,13 +14,13 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
   const supabase = await createClient()
-  if (!supabase) return { title: "Auto Syria" }
+  if (!supabase) return { title: "SiwdaCars" }
 
   const { data } = await supabase.from("cars").select("brand, model, year, price, governorate, images").eq("id", id).single()
   if (!data) return { title: "السيارة غير موجودة" }
 
-  const title = `سيارة ${data.brand}, ${data.model}, ${data.year} في ${data.governorate} في سوريا`
-  const description = `${data.brand} ${data.model} ${data.year} - ${formatPrice(data.price)}. سيارة متوفرة للبيع في ${data.governorate}، سوريا. تصفح التفاصيل وتواصل مع البائع.`
+  const title = `سيارة ${data.brand}, ${data.model}, ${data.year} في ${data.governorate}`
+  const description = `${data.brand} ${data.model} ${data.year} - ${formatPrice(data.price)}. سيارة متوفرة للبيع في ${data.governorate}، السويداء. تصفح التفاصيل وتواصل مع البائع.`
   const imageUrl = data.images?.[0] ? getImageUrl(data.images[0]) : undefined
 
   return {
@@ -54,9 +54,9 @@ export default async function CarDetailPage({ params }: PageProps) {
 
   const c = car as Car
   const imageUrls = (c.images || []).map(img => getImageUrl(img))
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://autosyria.com"
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://siwdacars.com"
   const carUrl = `${baseUrl}/cars/${id}`
-  const shareText = `سيارة ${c.brand} ${c.model} ${c.year} - ${formatPrice(c.price)} في ${c.governorate}، سوريا`
+  const shareText = `سيارة ${c.brand} ${c.model} ${c.year} - ${formatPrice(c.price)} في ${c.governorate}، السويداء`
   const whatsappLink = generateWhatsAppLink(WHATSAPP_NUMBER, c.brand, c.model, c.year, c.price, c.ref_number, carUrl)
 
   return (

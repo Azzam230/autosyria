@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next"
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Auto Syria - سوق السيارات في سوريا",
-    short_name: "Auto Syria",
-    description: "سوق السيارات الأول في سوريا - بيع وشراء السيارات المستعملة والجديدة",
+    name: "SiwdaCars - سوق السيارات في السويداء",
+    short_name: "SiwdaCars",
+    description: "أول منصة متخصصة في بيع وشراء السيارات في السويداء",
     start_url: "/",
     display: "standalone",
     background_color: "#F8FAFC",
