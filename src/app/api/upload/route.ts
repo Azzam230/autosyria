@@ -38,14 +38,13 @@ export async function POST(request: Request) {
     if (!allowed.includes(file.type)) return NextResponse.json({ error: "نوع الملف غير مدعوم" }, { status: 400 })
     if (file.size > 2 * 1024 * 1024) return NextResponse.json({ error: "الملف كبير جداً (حد أقصى 2MB)" }, { status: 400 })
 
-    const bytes = await file.bytes()
     const ext = file.name.split(".").pop()
     const prefix = bucket === "brand-logos" ? "brands/" : "ads/"
     const filePath = `${prefix}${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
     const { error: uploadError } = await supabase.storage
       .from(bucket)
-      .upload(filePath, bytes, { contentType: file.type, upsert: true })
+      .upload(filePath, file, { contentType: file.type, upsert: true })
 
     if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
     return NextResponse.json({ path: filePath })
