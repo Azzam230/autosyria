@@ -1,31 +1,43 @@
 import { NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
-async function getSupabase() {
+async function getAuthClient() {
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
+  if (!url || !key || key === "your_supabase_anon_key_here") return null
+
   const cookieStore = await cookies()
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!.replace(/\/rest\/v1\/?$/, '')
-  return createServerClient(
-    supabaseUrl,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
-        },
+  const ssrClient = createServerClient(url, key, {
+    cookies: {
+      getAll() { return cookieStore.getAll() },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) =>
+          cookieStore.set(name, value, options)
+        )
       },
-    }
-  )
+    },
+  })
+
+  const { data: { user } } = await ssrClient.auth.getUser()
+  if (!user) return null
+
+  const { data: { session } } = await ssrClient.auth.getSession()
+  if (!session?.access_token) return null
+
+  const dataClient = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${session.access_token}` } },
+  })
+  return dataClient
 }
 
 export async function POST(request: Request) {
   try {
-    const supabase = await getSupabase()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = await getAuthClient()
+    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     const formData = await request.formData()
     const file = formData.get("file") as File | null
@@ -55,15 +67,15 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getSupabase()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = await getAuthClient()
+    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
     const path = searchParams.get("path")
     if (!path) return NextResponse.json({ error: "المسار مطلوب" }, { status: 400 })
 
-    const { error } = await supabase.storage.from("brand-logos").remove([path])
+    const bucket = path.startsWith("ads/") ? "ad-images" : "brand-logos"
+    const { error } = await supabase.storage.from(bucket).remove([path])
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   } catch (err) {

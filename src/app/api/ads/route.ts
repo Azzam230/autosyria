@@ -3,6 +3,10 @@ import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
+function getClient(url: string, key: string) {
+  return createClient(url, key)
+}
+
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, '')
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -10,13 +14,14 @@ function getServiceClient() {
   return createClient(url, key)
 }
 
-async function getAuthSupabase() {
+async function getAuthClient() {
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
   if (!url || !key || key === "your_supabase_anon_key_here") return null
+
   const cookieStore = await cookies()
-  return createServerClient(url, key, {
+  const ssrClient = createServerClient(url, key, {
     cookies: {
       getAll() { return cookieStore.getAll() },
       setAll(cookiesToSet) {
@@ -26,6 +31,18 @@ async function getAuthSupabase() {
       },
     },
   })
+
+  const { data: { user } } = await ssrClient.auth.getUser()
+  if (!user) return null
+
+  const { data: { session } } = await ssrClient.auth.getSession()
+  if (!session?.access_token) return null
+
+  const dataClient = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${session.access_token}` } },
+  })
+  return dataClient
 }
 
 export async function GET(request: Request) {
@@ -46,10 +63,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await getAuthSupabase()
-    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = await getAuthClient()
+    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
@@ -75,10 +90,8 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await getAuthSupabase()
-    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = await getAuthClient()
+    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
@@ -105,10 +118,8 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getAuthSupabase()
-    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = await getAuthClient()
+    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")

@@ -3,14 +3,13 @@ import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 import { createServerClient } from "@supabase/ssr"
 
-async function getAuthSupabase() {
+async function getAuthClient() {
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
-  console.log("[api/brands] getAuthSupabase - URL exists:", !!url, "KEY exists:", !!key)
-  if (!url || !key || key === "your_supabase_anon_key_here") { console.log("[api/brands] getAuthSupabase: returning null"); return null }
+  if (!url || !key || key === "your_supabase_anon_key_here") return null
   const cookieStore = await cookies()
-  return createServerClient(url, key, {
+  const ssrClient = createServerClient(url, key, {
       cookies: {
         getAll() { return cookieStore.getAll() },
         setAll(cookiesToSet) {
@@ -21,6 +20,16 @@ async function getAuthSupabase() {
       },
     }
   )
+
+  const { data: { user } } = await ssrClient.auth.getUser()
+  if (!user) return null
+  const { data: { session } } = await ssrClient.auth.getSession()
+  if (!session?.access_token) return null
+  const dataClient = createClient(url, key, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${session.access_token}` } },
+  })
+  return dataClient
 }
 
 function getPublicSupabase() {
@@ -45,7 +54,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await getAuthSupabase()
+    const supabase = await getAuthClient()
     if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
@@ -71,7 +80,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await getAuthSupabase()
+    const supabase = await getAuthClient()
     if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
@@ -98,7 +107,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getAuthSupabase()
+    const supabase = await getAuthClient()
     if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
