@@ -41,3 +41,19 @@ export interface CarFilters {
   minPrice?: number
   maxPrice?: number
 }
+
+export type AdPosition = 'home_between_cards' | 'search_sidebar' | 'car_detail_sidebar'
+
+export interface Ad {
+  id: string
+  image_url: string
+  link_url: string | null
+  position: AdPosition
+  alt_text: string | null
+  is_active: boolean
+  sort_order: number
+  views: number
+  clicks: number
+  created_at: string
+  updated_at: string
+}

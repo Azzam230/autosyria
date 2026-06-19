@@ -1,8 +1,37 @@
 import { createClient } from "@/lib/supabase/server"
 import type { Car } from "@/lib/types"
+import type { Ad } from "@/lib/types"
 import CarCard from "./CarCard"
+import AdDisplay from "@/components/ads/AdDisplay"
 import { ITEMS_PER_PAGE } from "@/lib/constants"
 import { Car as CarIcon, AlertCircle } from "lucide-react"
+
+function weightedRandom(ads: Ad[]): Ad {
+  if (ads.length === 0) throw new Error("No ads")
+  if (ads.length === 1) return ads[0]
+  const maxOrder = Math.max(...ads.map(a => a.sort_order))
+  const minOrder = Math.min(...ads.map(a => a.sort_order))
+  const range = maxOrder - minOrder + 1
+  const weights = ads.map(a => range - (a.sort_order - minOrder))
+  const totalWeight = weights.reduce((a, b) => a + b, 0)
+  let random = Math.random() * totalWeight
+  for (let i = 0; i < ads.length; i++) {
+    random -= weights[i]
+    if (random <= 0) return ads[i]
+  }
+  return ads[ads.length - 1]
+}
+
+async function getAds(position: string): Promise<Ad[]> {
+  try {
+    const supabase = await createClient()
+    if (!supabase) return []
+    const { data } = await supabase.from("ads").select("*").eq("is_active", true).eq("position", position)
+    return (data as Ad[]) || []
+  } catch {
+    return []
+  }
+}
 
 interface CarGridProps {
   searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
@@ -89,12 +118,25 @@ export default async function CarGrid({ searchParams }: CarGridProps) {
 
     const totalPages = Math.ceil((count || 0) / ITEMS_PER_PAGE)
 
+    const homeAds = await getAds("home_between_cards")
+
+    const elements: React.ReactNode[] = []
+    cars.forEach((car: Car, i: number) => {
+      elements.push(<CarCard key={car.id} car={car} priority={i < 4} />)
+      if ((i + 1) % 4 === 0 && homeAds.length > 0) {
+        const ad = weightedRandom(homeAds)
+        elements.push(
+          <div key={`ad-${i}`} className="col-span-1">
+            <AdDisplay ad={ad} className="aspect-[16/9] w-full" />
+          </div>
+        )
+      }
+    })
+
     return (
       <div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-          {cars.map((car: Car, i: number) => (
-            <CarCard key={car.id} car={car} priority={i < 4} />
-          ))}
+          {elements}
         </div>
 
         {totalPages > 1 && (

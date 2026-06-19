@@ -4,6 +4,9 @@ import CarGrid from "@/components/home/CarGrid"
 import ErrorBoundary from "@/components/ui/ErrorBoundary"
 import SearchFilters from "./SearchFilters"
 import SearchInput from "./SearchInput"
+import AdDisplay from "@/components/ads/AdDisplay"
+import { createClient } from "@/lib/supabase/server"
+import type { Ad } from "@/lib/types"
 
 export const metadata: Metadata = {
   title: "بحث متقدم",
@@ -12,6 +15,31 @@ export const metadata: Metadata = {
 
 interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+
+async function SidebarAd() {
+  try {
+    const supabase = await createClient()
+    if (!supabase) return null
+    const { data } = await supabase.from("ads").select("*").eq("is_active", true).eq("position", "search_sidebar")
+    const ads = data as Ad[] | null
+    if (!ads || ads.length === 0) return null
+    if (ads.length === 1) return <AdDisplay ad={ads[0]} className="w-full aspect-[6/5]" />
+    const maxOrder = Math.max(...ads.map(a => a.sort_order))
+    const minOrder = Math.min(...ads.map(a => a.sort_order))
+    const range = maxOrder - minOrder + 1
+    const weights = ads.map(a => range - (a.sort_order - minOrder))
+    const totalWeight = weights.reduce((a, b) => a + b, 0)
+    let random = Math.random() * totalWeight
+    let selected = ads[0]
+    for (let i = 0; i < ads.length; i++) {
+      random -= weights[i]
+      if (random <= 0) { selected = ads[i]; break }
+    }
+    return <AdDisplay ad={selected} className="w-full aspect-[6/5]" />
+  } catch {
+    return null
+  }
 }
 
 export default async function SearchPage({ searchParams }: PageProps) {
@@ -33,29 +61,39 @@ export default async function SearchPage({ searchParams }: PageProps) {
         <SearchFilters />
       </Suspense>
 
-      <div>
-        <ErrorBoundary fallback={
-          <div className="flex flex-col items-center justify-center py-16 gap-3">
-            <p className="text-muted">تعذر تحميل النتائج. حاول مرة أخرى لاحقاً.</p>
-          </div>
-        }>
-          <Suspense fallback={
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
-              {Array.from({ length: 8 }).map((_, i) => (
-                <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
-                  <div className="aspect-[16/9] bg-muted/20 animate-pulse" />
-                  <div className="p-3 space-y-3">
-                    <div className="h-5 w-24 bg-muted/20 rounded animate-pulse" />
-                    <div className="h-4 w-40 bg-muted/20 rounded animate-pulse" />
-                    <div className="h-3 w-32 bg-muted/20 rounded animate-pulse" />
-                  </div>
-                </div>
-              ))}
+      <div className="flex gap-6">
+        <div className="flex-1 min-w-0">
+          <ErrorBoundary fallback={
+            <div className="flex flex-col items-center justify-center py-16 gap-3">
+              <p className="text-muted">تعذر تحميل النتائج. حاول مرة أخرى لاحقاً.</p>
             </div>
           }>
-            <CarGrid searchParams={Promise.resolve(params)} />
-          </Suspense>
-        </ErrorBoundary>
+            <Suspense fallback={
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div key={i} className="rounded-lg border border-border bg-card overflow-hidden">
+                    <div className="aspect-[16/9] bg-muted/20 animate-pulse" />
+                    <div className="p-3 space-y-3">
+                      <div className="h-5 w-24 bg-muted/20 rounded animate-pulse" />
+                      <div className="h-4 w-40 bg-muted/20 rounded animate-pulse" />
+                      <div className="h-3 w-32 bg-muted/20 rounded animate-pulse" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            }>
+              <CarGrid searchParams={Promise.resolve(params)} />
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+        <aside className="w-72 hidden lg:block shrink-0">
+          <div className="sticky top-24 space-y-4">
+            <div className="text-xs text-muted font-medium mb-2">إعلان</div>
+            <Suspense fallback={<div className="w-full aspect-[6/5] rounded-lg bg-card animate-pulse" />}>
+              <SidebarAd />
+            </Suspense>
+          </div>
+        </aside>
       </div>
     </div>
   )

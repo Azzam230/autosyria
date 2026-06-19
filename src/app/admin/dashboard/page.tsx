@@ -6,8 +6,9 @@ import { ToastProvider } from "@/components/ui/Toast"
 import CarManagement from "@/components/admin/CarManagement"
 import SellRequestsTable from "@/components/admin/SellRequestsTable"
 import BrandManagement from "@/components/admin/BrandManagement"
+import AdManagement from "@/components/admin/AdManagement"
 import Button from "@/components/ui/Button"
-import { LogOut, Car, ClipboardList, Tag, BarChart3, DollarSign, Mail } from "lucide-react"
+import { LogOut, Car, ClipboardList, Tag, BarChart3, DollarSign, Mail, Megaphone } from "lucide-react"
 
 interface Stats {
   availableCars: number
@@ -16,7 +17,7 @@ interface Stats {
   totalBrands: number
 }
 
-type Tab = "cars" | "requests" | "brands"
+type Tab = "cars" | "requests" | "brands" | "ads"
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<Tab>("cars")
@@ -78,6 +79,7 @@ export default function AdminDashboard() {
     { key: "cars", label: "إدارة الإعلانات", icon: <Car className="w-4 h-4" /> },
     { key: "brands", label: "الماركات", icon: <Tag className="w-4 h-4" /> },
     { key: "requests", label: "طلبات البيع", icon: <ClipboardList className="w-4 h-4" /> },
+    { key: "ads", label: "الإعلانات المدفوعة", icon: <Megaphone className="w-4 h-4" /> },
   ]
 
   return (
@@ -143,6 +145,7 @@ export default function AdminDashboard() {
           {activeTab === "cars" && <CarManagement />}
           {activeTab === "brands" && <BrandManagement />}
           {activeTab === "requests" && <SellRequestsTable />}
+          {activeTab === "ads" && <AdManagement />}
         </div>
       </div>
     </ToastProvider>

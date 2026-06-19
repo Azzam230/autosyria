@@ -27,16 +27,20 @@ export async function POST(request: Request) {
     const file = formData.get("file") as File | null
     if (!file) return NextResponse.json({ error: "الملف مطلوب" }, { status: 400 })
 
+    const bucket = (formData.get("bucket") as string) || "brand-logos"
+    if (!["brand-logos", "ad-images"].includes(bucket)) return NextResponse.json({ error: "Bucket غير مدعوم" }, { status: 400 })
+
     const allowed = ["image/jpeg", "image/png", "image/webp"]
     if (!allowed.includes(file.type)) return NextResponse.json({ error: "نوع الملف غير مدعوم" }, { status: 400 })
     if (file.size > 2 * 1024 * 1024) return NextResponse.json({ error: "الملف كبير جداً (حد أقصى 2MB)" }, { status: 400 })
 
     const bytes = await file.bytes()
     const ext = file.name.split(".").pop()
-    const filePath = `brands/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const prefix = bucket === "brand-logos" ? "brands/" : "ads/"
+    const filePath = `${prefix}${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
     const { error: uploadError } = await supabase.storage
-      .from("brand-logos")
+      .from(bucket)
       .upload(filePath, bytes, { contentType: file.type, upsert: true })
 
     if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })

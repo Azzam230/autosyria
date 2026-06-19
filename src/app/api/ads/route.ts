@@ -1,0 +1,143 @@
+import { NextResponse } from "next/server"
+import { createClient } from "@supabase/supabase-js"
+import { cookies } from "next/headers"
+import { createServerClient } from "@supabase/ssr"
+
+function getServiceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, '')
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return null
+  return createClient(url, key)
+}
+
+async function getAuthSupabase() {
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
+  if (!url || !key || key === "your_supabase_anon_key_here") return null
+  const cookieStore = await cookies()
+  return createServerClient(url, key, {
+    cookies: {
+      getAll() { return cookieStore.getAll() },
+      setAll() {},
+    },
+  })
+}
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const position = searchParams.get("position")
+
+  const supabase = getServiceClient()
+  if (!supabase) return NextResponse.json({ error: "Service not configured" }, { status: 500 })
+
+  let query = supabase.from("ads").select("*").eq("is_active", true)
+  if (position) query = query.eq("position", position)
+  query = query.order("sort_order", { ascending: false })
+
+  const { data, error } = await query
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json(data)
+}
+
+export async function POST(request: Request) {
+  try {
+    const supabase = await getAuthSupabase()
+    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+
+    let body: Record<string, unknown>
+    try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
+
+    const image_url = typeof body.image_url === "string" ? body.image_url.trim() : ""
+    const link_url = typeof body.link_url === "string" ? body.link_url.trim() : ""
+    const position = typeof body.position === "string" ? body.position.trim() : ""
+    const alt_text = typeof body.alt_text === "string" ? body.alt_text.trim() : ""
+    const sort_order = typeof body.sort_order === "number" ? body.sort_order : 0
+
+    if (!image_url || !position) return NextResponse.json({ error: "الصورة والموقع مطلوبان" }, { status: 400 })
+
+    const { data, error } = await supabase.from("ads").insert([
+      { image_url, link_url: link_url || null, position, alt_text: alt_text || null, sort_order },
+    ]).select().single()
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data, { status: 201 })
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "خطأ" }, { status: 500 })
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const supabase = await getAuthSupabase()
+    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+
+    let body: Record<string, unknown>
+    try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
+
+    const id = body.id as string
+    if (!id) return NextResponse.json({ error: "المعرف مطلوب" }, { status: 400 })
+
+    const updates: Record<string, unknown> = {}
+    if (typeof body.image_url === "string") updates.image_url = body.image_url.trim()
+    if (typeof body.link_url === "string") updates.link_url = body.link_url.trim() || null
+    if (typeof body.position === "string") updates.position = body.position.trim()
+    if (typeof body.alt_text === "string") updates.alt_text = body.alt_text.trim() || null
+    if (typeof body.is_active === "boolean") updates.is_active = body.is_active
+    if (typeof body.sort_order === "number") updates.sort_order = body.sort_order
+    updates.updated_at = new Date().toISOString()
+
+    const { data, error } = await supabase.from("ads").update(updates).eq("id", id).select().single()
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data)
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "خطأ" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const supabase = await getAuthSupabase()
+    if (!supabase) return NextResponse.json({ error: "قاعدة البيانات غير متصلة" }, { status: 500 })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+    if (!id) return NextResponse.json({ error: "المعرف مطلوب" }, { status: 400 })
+
+    const { error } = await supabase.from("ads").delete().eq("id", id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "خطأ" }, { status: 500 })
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    let body: { id: string; action: string }
+    try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
+
+    const supabase = getServiceClient()
+    if (!supabase) return NextResponse.json({ error: "Service not configured" }, { status: 500 })
+
+    if (body.action === "view") {
+      const { error } = await supabase.rpc("increment_ad_views", { ad_id: body.id })
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    } else if (body.action === "click") {
+      const { error } = await supabase.rpc("increment_ad_clicks", { ad_id: body.id })
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    } else {
+      return NextResponse.json({ error: "action must be 'view' or 'click'" }, { status: 400 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (err) {
+    return NextResponse.json({ error: err instanceof Error ? err.message : "خطأ" }, { status: 500 })
+  }
+}

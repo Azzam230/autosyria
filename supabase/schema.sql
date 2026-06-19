@@ -89,3 +89,49 @@ CREATE POLICY "Admin can update brands"
 
 CREATE POLICY "Admin can delete brands"
   ON brands FOR DELETE USING (auth.role() = 'authenticated');
+
+-- ========== ADS (إعلانات) ==========
+
+CREATE TABLE IF NOT EXISTS ads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  image_url TEXT NOT NULL,
+  link_url TEXT,
+  position TEXT NOT NULL CHECK (position IN ('home_between_cards', 'search_sidebar', 'car_detail_sidebar')),
+  alt_text TEXT,
+  is_active BOOLEAN DEFAULT true,
+  sort_order INTEGER DEFAULT 0,
+  views INTEGER DEFAULT 0,
+  clicks INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE ads ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Public can view active ads"
+  ON ads FOR SELECT USING (is_active = true);
+
+CREATE POLICY "Admin can insert ads"
+  ON ads FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "Admin can update ads"
+  ON ads FOR UPDATE USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Admin can delete ads"
+  ON ads FOR DELETE USING (auth.role() = 'authenticated');
+
+-- Also: create storage bucket ad-images (via Supabase UI: Storage → New Bucket → ad-images → Public)
+
+CREATE OR REPLACE FUNCTION increment_ad_views(ad_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE ads SET views = views + 1 WHERE id = ad_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE OR REPLACE FUNCTION increment_ad_clicks(ad_id UUID)
+RETURNS void AS $$
+BEGIN
+  UPDATE ads SET clicks = clicks + 1 WHERE id = ad_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
