@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
 
-function getClient(url: string, key: string) {
+function getAnonClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, '')
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !key || key === "your_supabase_anon_key_here") return null
   return createClient(url, key)
 }
 
@@ -14,43 +16,12 @@ function getServiceClient() {
   return createClient(url, key)
 }
 
-async function getAuthClient() {
-  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
-  if (!url || !key || key === "your_supabase_anon_key_here") return null
-
-  const cookieStore = await cookies()
-  const ssrClient = createServerClient(url, key, {
-    cookies: {
-      getAll() { return cookieStore.getAll() },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        )
-      },
-    },
-  })
-
-  const { data: { user } } = await ssrClient.auth.getUser()
-  if (!user) return null
-
-  const { data: { session } } = await ssrClient.auth.getSession()
-  if (!session?.access_token) return null
-
-  const dataClient = createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { Authorization: `Bearer ${session.access_token}` } },
-  })
-  return dataClient
-}
-
 export async function GET(request: Request) {
+  const supabase = getAnonClient()
+  if (!supabase) return NextResponse.json({ error: "Database not configured" }, { status: 500 })
+
   const { searchParams } = new URL(request.url)
   const position = searchParams.get("position")
-
-  const supabase = getServiceClient()
-  if (!supabase) return NextResponse.json({ error: "Service not configured" }, { status: 500 })
 
   let query = supabase.from("ads").select("*").eq("is_active", true)
   if (position) query = query.eq("position", position)
@@ -61,9 +32,49 @@ export async function GET(request: Request) {
   return NextResponse.json(data)
 }
 
+async function getAuthedClient() {
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
+  if (!url || !anonKey || anonKey === "your_supabase_anon_key_here") return null
+
+  const cookieStore = await cookies()
+  const allCookies = cookieStore.getAll()
+
+  const authCookie = allCookies.find(c => c.name.startsWith("sb-") && c.name.includes("auth-token") && !c.name.endsWith("-code-verifier"))
+  if (!authCookie) return null
+
+  try {
+    const raw = authCookie.value
+    let sessionStr: string
+
+    if (raw.startsWith("base64-")) {
+      sessionStr = Buffer.from(raw.slice(7), "base64url").toString()
+    } else {
+      sessionStr = raw
+    }
+
+    const session = JSON.parse(sessionStr)
+    const accessToken = session.access_token
+    if (!accessToken) return null
+
+    const supabase = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    return supabase
+  } catch {
+    return null
+  }
+}
+
 export async function POST(request: Request) {
   try {
-    const supabase = await getAuthClient()
+    const supabase = await getAuthedClient()
     if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     let body: Record<string, unknown>
@@ -90,7 +101,7 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await getAuthClient()
+    const supabase = await getAuthedClient()
     if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     let body: Record<string, unknown>
@@ -118,7 +129,7 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getAuthClient()
+    const supabase = await getAuthedClient()
     if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
@@ -138,8 +149,8 @@ export async function PATCH(request: Request) {
     let body: { id: string; action: string }
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
 
-    const supabase = getServiceClient()
-    if (!supabase) return NextResponse.json({ error: "Service not configured" }, { status: 500 })
+    const supabase = getServiceClient() || getAnonClient()
+    if (!supabase) return NextResponse.json({ error: "Database not configured" }, { status: 500 })
 
     if (body.action === "view") {
       const { error } = await supabase.rpc("increment_ad_views", { ad_id: body.id })

@@ -1,42 +1,50 @@
 import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
-import { createServerClient } from "@supabase/ssr"
 
-async function getAuthClient() {
+async function getAuthedClient() {
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   const url = rawUrl?.replace(/\/rest\/v1\/?$/, '')
-  if (!url || !key || key === "your_supabase_anon_key_here") return null
+  if (!url || !anonKey || anonKey === "your_supabase_anon_key_here") return null
 
   const cookieStore = await cookies()
-  const ssrClient = createServerClient(url, key, {
-    cookies: {
-      getAll() { return cookieStore.getAll() },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        )
-      },
-    },
-  })
+  const allCookies = cookieStore.getAll()
 
-  const { data: { user } } = await ssrClient.auth.getUser()
-  if (!user) return null
+  const authCookie = allCookies.find(c => c.name.startsWith("sb-") && c.name.includes("auth-token") && !c.name.endsWith("-code-verifier"))
+  if (!authCookie) return null
 
-  const { data: { session } } = await ssrClient.auth.getSession()
-  if (!session?.access_token) return null
+  try {
+    const raw = authCookie.value
+    let sessionStr: string
 
-  const dataClient = createClient(url, key, {
-    auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { Authorization: `Bearer ${session.access_token}` } },
-  })
-  return dataClient
+    if (raw.startsWith("base64-")) {
+      sessionStr = Buffer.from(raw.slice(7), "base64url").toString()
+    } else {
+      sessionStr = raw
+    }
+
+    const session = JSON.parse(sessionStr)
+    const accessToken = session.access_token
+    if (!accessToken) return null
+
+    const supabase = createClient(url, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    })
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+
+    return supabase
+  } catch {
+    return null
+  }
 }
 
 export async function POST(request: Request) {
   try {
-    const supabase = await getAuthClient()
+    const supabase = await getAuthedClient()
     if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     const formData = await request.formData()
@@ -67,7 +75,7 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getAuthClient()
+    const supabase = await getAuthedClient()
     if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
 
     const { searchParams } = new URL(request.url)
