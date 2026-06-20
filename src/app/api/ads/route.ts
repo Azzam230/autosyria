@@ -74,8 +74,9 @@ async function getAuthedClient() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await getAuthedClient()
-    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const authed = await getAuthedClient()
+    if (!authed) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = getServiceClient() || authed
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
@@ -101,8 +102,9 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await getAuthedClient()
-    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const authed = await getAuthedClient()
+    if (!authed) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = getServiceClient() || authed
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
@@ -129,8 +131,9 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getAuthedClient()
-    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const authed = await getAuthedClient()
+    if (!authed) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = getServiceClient() || authed
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")

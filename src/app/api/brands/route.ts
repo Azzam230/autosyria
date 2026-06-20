@@ -2,6 +2,13 @@ import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 
+function getServiceClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, '')
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) return null
+  return createClient(url, key)
+}
+
 async function getAuthedClient() {
   const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -60,8 +67,9 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await getAuthedClient()
-    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const authed = await getAuthedClient()
+    if (!authed) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = getServiceClient() || authed
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
@@ -84,8 +92,9 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
   try {
-    const supabase = await getAuthedClient()
-    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const authed = await getAuthedClient()
+    if (!authed) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = getServiceClient() || authed
 
     let body: Record<string, unknown>
     try { body = await request.json() } catch { return NextResponse.json({ error: "بيانات غير صالحة" }, { status: 400 }) }
@@ -109,8 +118,9 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const supabase = await getAuthedClient()
-    if (!supabase) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const authed = await getAuthedClient()
+    if (!authed) return NextResponse.json({ error: "غير مصرح" }, { status: 401 })
+    const supabase = getServiceClient() || authed
 
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
