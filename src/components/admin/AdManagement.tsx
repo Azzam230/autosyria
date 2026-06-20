@@ -12,9 +12,9 @@ const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_FILE_SIZE = 2 * 1024 * 1024
 
 const POSITIONS: { value: AdPosition; label: string }[] = [
-  { value: "home_between_cards", label: "بين بطاقات الصفحة الرئيسية" },
-  { value: "search_sidebar", label: "الشريط الجانبي للبحث" },
-  { value: "car_detail_sidebar", label: "الشريط الجانبي لتفاصيل السيارة" },
+  { value: "home_between_cards", label: "بين بطاقات الصفحة الرئيسية (مقاس 1200×675 بكسل)" },
+  { value: "search_sidebar", label: "الشريط الجانبي للبحث (مقاس 300×250 بكسل)" },
+  { value: "car_detail_sidebar", label: "الشريط الجانبي لتفاصيل السيارة (مقاس 300×250 بكسل)" },
 ]
 
 export default function AdManagement() {

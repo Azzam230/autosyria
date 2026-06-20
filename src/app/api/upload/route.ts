@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 import { cookies } from "next/headers"
 
+const STORAGE_URL = (process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, '') || '').replace(/\/+$/, '') + '/storage/v1/object/public'
+
 function getServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/rest\/v1\/?$/, '')
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -75,7 +77,7 @@ export async function POST(request: Request) {
       .upload(filePath, file, { contentType: file.type, upsert: true })
 
     if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
-    return NextResponse.json({ path: filePath })
+    return NextResponse.json({ path: `${STORAGE_URL}/${bucket}/${filePath}` })
   } catch (err) {
     return NextResponse.json({ error: err instanceof Error ? err.message : "خطأ غير متوقع" }, { status: 500 })
   }
